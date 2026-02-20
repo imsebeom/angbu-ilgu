@@ -1,6 +1,6 @@
 import { Text } from 'troika-three-text';
 import * as THREE from 'three';
-import { ZODIAC_12, SEASON_LINES, HOUR_LINES, RIM_OUTER_RADIUS, BOWL_RADIUS, BOWL_THICKNESS, DEG2RAD, LATITUDE } from './constants.js';
+import { ZODIAC_12, SEASON_LINES, HOUR_LINES, RIM_OUTER_RADIUS, BOWL_RADIUS, BOWL_THICKNESS, DEG2RAD, LATITUDE, LONGITUDE } from './constants.js';
 
 // Google Fonts CDN - Noto Sans KR Bold (가독성 좋은 고딕체, OTF)
 const FONT_URL = 'https://fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.otf';
@@ -61,7 +61,7 @@ function createZodiacLabels(parent) {
     // 한자 (위)
     const hanjaText = new Text();
     hanjaText.text = z.char;
-    hanjaText.fontSize = 0.032;
+    hanjaText.fontSize = 0.042;
     hanjaText.color = '#FFF8E7';
     hanjaText.font = FONT_URL;
     hanjaText.anchorX = 'center';
@@ -76,7 +76,7 @@ function createZodiacLabels(parent) {
     // 한글 (아래, 더 작게)
     const korText = new Text();
     korText.text = z.name;
-    korText.fontSize = 0.018;
+    korText.fontSize = 0.024;
     korText.color = '#FFD700';
     korText.font = FONT_URL;
     korText.anchorX = 'center';
@@ -111,7 +111,7 @@ function createSeasonLabels(parent, mode) {
 
       const text = new Text();
       text.text = mode === 'classic' ? season.label : season.name;
-      text.fontSize = mode === 'classic' ? 0.016 : 0.018;
+      text.fontSize = mode === 'classic' ? 0.022 : 0.024;
       text.color = mode === 'classic' ? '#FFF8E7' : '#FFD700';
       text.font = FONT_URL;
       text.anchorX = side.anchorX;
@@ -128,8 +128,8 @@ function createSeasonLabels(parent, mode) {
 }
 
 // ----- 시각선 라벨 -----
-// mode='modern' → "12시" + 부제 "午(오)"
-// mode='classic' → "午" + 부제 "정오(12시)"
+// mode='modern' → KST 시간 (동적 업데이트) + 부제 한자
+// mode='classic' → 한자 큰 글씨 + 부제 한글
 function createHourLabels(parent, mode) {
   for (const hour of HOUR_LINES) {
     const hRad = hour.hourAngle * DEG2RAD;
@@ -154,7 +154,7 @@ function createHourLabels(parent, mode) {
       // === 원본 모드: 한자 큰 글씨 ===
       const mainText = new Text();
       mainText.text = hour.label;
-      mainText.fontSize = hour.type === 'major' ? 0.028 : 0.018;
+      mainText.fontSize = hour.type === 'major' ? 0.036 : 0.024;
       mainText.color = '#FFF8E7';
       mainText.font = FONT_URL;
       mainText.anchorX = 'center';
@@ -171,12 +171,12 @@ function createHourLabels(parent, mode) {
       if (hour.type === 'major') {
         const subText = new Text();
         subText.text = `${hour.name}(${hour.hour}시)`;
-        subText.fontSize = 0.013;
+        subText.fontSize = 0.017;
         subText.color = '#B0A590';
         subText.font = FONT_URL;
         subText.anchorX = 'center';
         subText.anchorY = 'middle';
-        const rInner = r - 0.06;
+        const rInner = r - 0.07;
         subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle + Math.PI;
@@ -186,10 +186,11 @@ function createHourLabels(parent, mode) {
         parent.add(subText);
       }
     } else {
-      // === 현대 모드: 아라비아 숫자 큰 글씨 ===
+      // === 현대 모드: KST 시간 (동적 업데이트 가능) ===
       const mainText = new Text();
-      mainText.text = `${hour.hour}시`;
-      mainText.fontSize = hour.type === 'major' ? 0.025 : 0.016;
+      mainText.name = `hour-modern-${hour.hourAngle}`;
+      mainText.text = `${hour.hour}:00`; // 초기값, updateModernHourLabels()로 갱신
+      mainText.fontSize = hour.type === 'major' ? 0.032 : 0.022;
       mainText.color = hour.type === 'major' ? '#FFF8E7' : '#E8D5B0';
       mainText.font = FONT_URL;
       mainText.anchorX = 'center';
@@ -202,16 +203,16 @@ function createHourLabels(parent, mode) {
       mainText.sync();
       parent.add(mainText);
 
-      // 한자 + 한글 (부제, 안쪽 작게) - major만
+      // 한자 (부제, 안쪽 작게) - major만
       if (hour.type === 'major') {
         const subText = new Text();
         subText.text = `${hour.label}(${hour.name})`;
-        subText.fontSize = 0.014;
+        subText.fontSize = 0.018;
         subText.color = '#FFD700';
         subText.font = FONT_URL;
         subText.anchorX = 'center';
         subText.anchorY = 'middle';
-        const rInner = r - 0.06;
+        const rInner = r - 0.07;
         subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle + Math.PI;
@@ -221,6 +222,52 @@ function createHourLabels(parent, mode) {
         parent.add(subText);
       }
     }
+  }
+}
+
+/**
+ * 현대 모드 시각 라벨을 날짜 기반 KST로 업데이트
+ * 균시차 + 경도보정을 적용하여 각 시각선이 실제로 KST 몇 시에 해당하는지 표시
+ */
+export function updateModernHourLabels(labelsGroup, date) {
+  const modernGroup = labelsGroup.getObjectByName('labels-modern');
+  if (!modernGroup) return;
+
+  // 균시차 + 경도보정 계산 (sun-position.js의 calcHourAngleAndDec와 동일 로직)
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const dayOfYear = diff / 86400000;
+  const gamma = 2 * Math.PI * (dayOfYear - 1) / 365;
+
+  // Spencer 균시차 (분)
+  const eqTime = 229.18 * (0.000075
+    + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+    - 0.014615 * Math.cos(2 * gamma) - 0.04089 * Math.sin(2 * gamma));
+
+  // 경도 보정 (분): KST 기준 경도 135°E, 서울 126.978°E
+  const standardMeridian = 135;
+  const longitudeCorrection = 4 * (LONGITUDE - standardMeridian); // 약 -32분
+
+  // 진태양시 12:00 (H=0°) = KST (12 - (eqTime + lonCorr)/60) 시
+  // 즉 시간각 H도의 시각선은 KST = (12 + H/15) - (eqTime + lonCorr)/60
+  const correctionMinutes = eqTime + longitudeCorrection; // 총 보정 (분)
+
+  for (const hour of HOUR_LINES) {
+    const textObj = modernGroup.getObjectByName(`hour-modern-${hour.hourAngle}`);
+    if (!textObj) continue;
+
+    // 진태양시 = 12 + hourAngle/15 (시)
+    const apparentSolarHour = 12 + hour.hourAngle / 15;
+    // KST = 진태양시 - 보정 (분을 시로 변환)
+    const kstHour = apparentSolarHour - correctionMinutes / 60;
+
+    const kstH = Math.floor(kstHour);
+    const kstM = Math.round((kstHour - kstH) * 60);
+    const hStr = kstH.toString().padStart(2, '0');
+    const mStr = Math.abs(kstM).toString().padStart(2, '0');
+
+    textObj.text = `${hStr}:${mStr}`;
+    textObj.sync();
   }
 }
 

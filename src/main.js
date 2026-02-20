@@ -3,7 +3,7 @@ import { buildAngbuIlgu } from './angbu-ilgu.js';
 import { createAllLines } from './sundial-lines.js';
 import { createShadowMarker, updateShadowMarker } from './shadow-engine.js';
 import { getSunPosition, updateSunLight } from './sun-position.js';
-import { createAllLabels, setLabelMode } from './text-labels.js';
+import { createAllLabels, setLabelMode, updateModernHourLabels } from './text-labels.js';
 import { initUI } from './ui-controls.js';
 
 // ===== 상태 =====
@@ -47,6 +47,8 @@ const ui = initUI(state, {
 });
 
 // ===== 씬 업데이트 =====
+let lastLabelUpdateDay = -1; // 날짜 단위 캐시 (같은 날이면 라벨 갱신 불필요)
+
 function updateScene(date) {
   const sunData = getSunPosition(date);
 
@@ -58,6 +60,13 @@ function updateScene(date) {
 
   // 그림자 마커 업데이트
   updateShadowMarker(shadowMarker, sunData);
+
+  // 현대 모드 시각 라벨: 날짜가 바뀌면 KST 시간 업데이트
+  const dayKey = date.getFullYear() * 400 + date.getMonth() * 32 + date.getDate();
+  if (dayKey !== lastLabelUpdateDay) {
+    lastLabelUpdateDay = dayKey;
+    updateModernHourLabels(labelsGroup, date);
+  }
 
   // UI 정보 패널 업데이트
   ui.updateDisplay(date, sunData);
