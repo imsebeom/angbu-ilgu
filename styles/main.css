@@ -277,23 +277,9 @@ input[type="range"]::-moz-range-thumb {
   font-weight: 600;
 }
 
-/* === 실시간 버튼 (speed-controls 내) === */
-.speed-btn.realtime-btn {
-  background: rgba(205, 127, 50, 0.12);
-  border-color: rgba(205, 127, 50, 0.35);
-  color: #CD7F32;
-}
-
-.speed-btn.realtime-btn:hover {
-  background: rgba(205, 127, 50, 0.25);
-  color: #e8d5a0;
-}
-
+/* 실시간 버튼: active일 때만 약간 강조 */
 .speed-btn.realtime-btn.active {
-  background: #CD7F32;
-  border-color: #CD7F32;
-  color: #1a1a2e;
-  font-weight: 700;
+  background: rgba(205, 127, 50, 0.35);
 }
 
 /* === 정보 패널 === */
