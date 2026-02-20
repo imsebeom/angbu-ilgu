@@ -348,7 +348,7 @@ function createNoonLineLabels(parent, mode) {
     text.anchorY = 'middle';
 
     text.position.copy(pt);
-    orientTextOnBowl(text, pt);
+    orientTextOnBowl(text, pt, true);
 
     text.depthOffset = -0.2;
     text.renderOrder = 1;
@@ -380,7 +380,7 @@ function createEquinoxLineLabels(parent, mode) {
     text.anchorY = 'top';
 
     text.position.copy(pt);
-    orientTextOnBowl(text, pt);
+    orientTextOnBowl(text, pt, true);
 
     text.depthOffset = -0.2;
     text.renderOrder = 1;
@@ -391,7 +391,7 @@ function createEquinoxLineLabels(parent, mode) {
 
 // ----- 공통: 반구 내면에 텍스트 방향 맞추기 -----
 // 텍스트를 반구 내면에 붙여서, 위에서 내려다볼 때 정상적으로 읽히게 배치
-function orientTextOnBowl(textObj, surfacePoint) {
+function orientTextOnBowl(textObj, surfacePoint, keepDepthTest = false) {
   // 법선 = 표면점 → 원점 방향 (내면 법선, 안쪽 향함)
   const inwardNormal = surfacePoint.clone().normalize().negate();
 
@@ -421,8 +421,10 @@ function orientTextOnBowl(textObj, surfacePoint) {
   textObj.quaternion.setFromRotationMatrix(m);
 
   // 반구 벽보다 앞에 렌더링되도록
-  textObj.renderOrder = 10;
-  textObj.material && (textObj.material.depthTest = false);
+  if (!keepDepthTest) {
+    textObj.renderOrder = 10;
+    textObj.material && (textObj.material.depthTest = false);
+  }
 }
 
 // ----- 공통: 라벨 위치 계산 -----
