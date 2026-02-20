@@ -25,7 +25,7 @@ export function getSunPosition(date) {
   // SunCalc az: 남=0 → Three.js에서 남=-z 방향
   // az가 양수(서쪽)일 때 x는 음수(서)
   const direction = new THREE.Vector3(
-    -Math.sin(az) * Math.cos(alt),  // x: 서쪽이 - (SunCalc 서=+이므로 반전)
+     Math.sin(az) * Math.cos(alt),  // x: 반전하여 화면 오른쪽=동
      Math.sin(alt),                  // y: 위
     -Math.cos(az) * Math.cos(alt),  // z: 남=-z (SunCalc 남=0일때 cos=1)
   ).normalize();

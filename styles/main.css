@@ -434,12 +434,12 @@ input[type="range"]::-moz-range-thumb {
 .t-name {
   color: #e0d5c1;
   font-weight: 500;
-  width: 32px;
+  white-space: nowrap;
 }
 
 .t-date {
   color: #8a7e6b;
-  width: 36px;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
@@ -458,6 +458,28 @@ input[type="range"]::-moz-range-thumb {
 .t-highlight.winter td { color: #88bbee; }
 .t-highlight .t-hanja { font-weight: 700; }
 .t-highlight .t-name { font-weight: 700; }
+
+/* === 12지신 시간 버튼 === */
+#jisin-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  background: rgba(160, 130, 200, 0.15);
+  border: 1.5px solid rgba(160, 130, 200, 0.4);
+  color: #b8a0d8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+#jisin-btn:hover {
+  background: rgba(160, 130, 200, 0.3);
+  border-color: #b8a0d8;
+}
 
 /* === 도움말 버튼 === */
 #help-btn {

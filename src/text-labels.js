@@ -63,7 +63,7 @@ function createZodiacLabels(parent) {
 
     // 지평환 테두리 중앙 위치
     const r = (RIM_OUTER_RADIUS + BOWL_RADIUS) / 2 + 0.01;
-    const x = Math.sin(angleRad) * r;
+    const x = -Math.sin(angleRad) * r;  // x반전: 화면 오른쪽=동
     const zPos = Math.cos(angleRad) * r;  // 子=0°=북=+z
 
     // 한자 (위)
@@ -76,7 +76,7 @@ function createZodiacLabels(parent) {
     hanjaText.anchorY = 'middle';
     hanjaText.position.set(x, 0.035, zPos);
     hanjaText.rotation.x = -Math.PI / 2;
-    hanjaText.rotation.z = -angleRad + Math.PI;
+    hanjaText.rotation.z = angleRad + Math.PI;
     hanjaText.depthOffset = -0.1;
     hanjaText.sync();
     parent.add(hanjaText);
@@ -92,11 +92,11 @@ function createZodiacLabels(parent) {
 
     // 한자보다 바깥쪽에 배치
     const rOuter = r + 0.04;
-    const xOuter = Math.sin(angleRad) * rOuter;
+    const xOuter = -Math.sin(angleRad) * rOuter;  // x반전
     const zOuter = Math.cos(angleRad) * rOuter;
     korText.position.set(xOuter, 0.035, zOuter);
     korText.rotation.x = -Math.PI / 2;
-    korText.rotation.z = -angleRad + Math.PI;
+    korText.rotation.z = angleRad + Math.PI;
     korText.depthOffset = -0.1;
     korText.sync();
     parent.add(korText);
@@ -328,7 +328,7 @@ function _calcHourLabelPosition(hourAngleDeg) {
     const az = azNorth - Math.PI;
 
     const sunDir = new THREE.Vector3(
-      -Math.sin(az) * cosAlt,
+       Math.sin(az) * cosAlt,  // x반전
       sinAlt,
       -Math.cos(az) * cosAlt,
     ).normalize();
@@ -487,7 +487,7 @@ function calcLabelPosition(decDeg, hDeg) {
 
   const R = BOWL_RADIUS - BOWL_THICKNESS - 0.01;
   const sunDir = new THREE.Vector3(
-    -Math.sin(az) * cosAlt,
+     Math.sin(az) * cosAlt,  // x반전
     sinAlt,
     -Math.cos(az) * cosAlt,
   ).normalize();

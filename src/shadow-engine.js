@@ -40,9 +40,9 @@ export function calculateShadowPoint(sunData) {
   // 남=0 기준으로 변환
   const az = azNorth - Math.PI;
 
-  // 태양 방향 → Three.js 좌표계
+  // 태양 방향 → Three.js 좌표계 (x반전: 카메라 남쪽에서 바라볼 때 화면 오른쪽=동)
   const sunDir = new THREE.Vector3(
-    -Math.sin(az) * cosAlt,
+     Math.sin(az) * cosAlt,
      sinAlt,
     -Math.cos(az) * cosAlt,
   ).normalize();

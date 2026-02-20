@@ -117,6 +117,7 @@
   <!-- 우측 하단: 모드 전환 + 도움말 버튼 -->
   <div id="bottom-right-btns">
     <button id="mode-btn" aria-label="격자 모드 전환">현대 시각</button>
+    <button id="jisin-btn" aria-label="12지신 시간 알아보기">12지신 시간?</button>
     <button id="terms-btn" aria-label="24절기 알아보기">24절기란?</button>
     <button id="help-btn" aria-label="앙부일구 알아보기">앙부일구란?</button>
   </div>
@@ -155,6 +156,13 @@
             <span class="guide-desc">영침 끝의 그림자가 지금 떨어지는 위치예요.</span>
           </div>
         </div>
+        <div class="modal-guide-item">
+          <span class="guide-icon" style="background:#FFF8E7;color:#3a2a15;font-weight:bold;font-size:14px;display:flex;align-items:center;justify-content:center;">子午</span>
+          <div>
+            <b>테두리 한자</b> = 방위 (동서남북)<br>
+            <span class="guide-desc">시간이 아니라 <b>방향</b>을 알려줘요! 子=북, 午=남, 卯=동, 酉=서. 앙부일구를 남쪽을 향해 놓으면 영침이 午(남쪽)를 가리켜요.</span>
+          </div>
+        </div>
       </div>
 
       <div class="modal-section">
@@ -189,6 +197,74 @@
           <li><b>스크롤</b> — 확대·축소</li>
           <li><b>왼쪽 슬라이더</b> — 날짜·시간 변경</li>
         </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12지신 시간 모달 -->
+  <div id="jisin-modal" class="modal-overlay" hidden>
+    <div class="modal-content">
+      <button class="modal-close-btn jisin-modal-close" aria-label="닫기">&times;</button>
+      <h2 class="modal-title">🕰️ 옛날 시간은 어떻게 읽을까?</h2>
+      <p class="modal-intro">
+        옛날에는 하루를 <b>12개</b>로 나눠서 시간을 말했어요.<br>
+        각 시간에 <b>동물 이름</b>을 붙였는데, 이걸 <b>12지신</b>이라고 해요!
+      </p>
+
+      <div class="modal-section">
+        <h3>🐾 12지신 시간표</h3>
+        <p class="guide-desc" style="margin-bottom:8px;">한 시진(時辰) = 현대 시간 <b>2시간</b></p>
+        <table class="terms-table">
+          <tr><td class="t-hanja">子</td><td class="t-name">자시 🐭</td><td class="t-date">23~01시</td><td class="t-desc">쥐가 활동하는 밤</td></tr>
+          <tr><td class="t-hanja">丑</td><td class="t-name">축시 🐮</td><td class="t-date">01~03시</td><td class="t-desc">소가 되새김질하는 새벽</td></tr>
+          <tr><td class="t-hanja">寅</td><td class="t-name">인시 🐯</td><td class="t-date">03~05시</td><td class="t-desc">호랑이가 사나운 시간</td></tr>
+          <tr><td class="t-hanja">卯</td><td class="t-name">묘시 🐰</td><td class="t-date">05~07시</td><td class="t-desc">토끼가 뛰노는 아침</td></tr>
+          <tr><td class="t-hanja">辰</td><td class="t-name">진시 🐉</td><td class="t-date">07~09시</td><td class="t-desc">용이 구름을 일으킴</td></tr>
+          <tr><td class="t-hanja">巳</td><td class="t-name">사시 🐍</td><td class="t-date">09~11시</td><td class="t-desc">뱀이 활동하는 오전</td></tr>
+          <tr class="t-highlight summer"><td class="t-hanja">午</td><td class="t-name">오시 🐴</td><td class="t-date">11~13시</td><td class="t-desc">해가 가장 높은 한낮</td></tr>
+          <tr><td class="t-hanja">未</td><td class="t-name">미시 🐑</td><td class="t-date">13~15시</td><td class="t-desc">양이 풀을 뜯는 오후</td></tr>
+          <tr><td class="t-hanja">申</td><td class="t-name">신시 🐵</td><td class="t-date">15~17시</td><td class="t-desc">원숭이가 우는 늦오후</td></tr>
+          <tr><td class="t-hanja">酉</td><td class="t-name">유시 🐔</td><td class="t-date">17~19시</td><td class="t-desc">닭이 집으로 돌아감</td></tr>
+          <tr><td class="t-hanja">戌</td><td class="t-name">술시 🐶</td><td class="t-date">19~21시</td><td class="t-desc">개가 집을 지키는 저녁</td></tr>
+          <tr><td class="t-hanja">亥</td><td class="t-name">해시 🐷</td><td class="t-date">21~23시</td><td class="t-desc">돼지가 잠드는 밤</td></tr>
+        </table>
+      </div>
+
+      <div class="modal-section">
+        <h3>⏱️ "초"와 "정"이 뭐예요?</h3>
+        <p class="modal-intro" style="margin-bottom:8px;">
+          각 시진(2시간)을 <b>반으로</b> 나눠요!
+        </p>
+        <ul class="modal-facts">
+          <li><b>초(初)</b> = 앞쪽 1시간. 예: <b>午初</b> = 11:00~12:00</li>
+          <li><b>정(正)</b> = 뒤쪽 1시간. 예: <b>午正</b> = 12:00~13:00</li>
+          <li>그래서 <b>"정오"</b>라는 말은 <b>午正</b>, 즉 낮 12시를 뜻해요!</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>📐 "각"이 뭐예요?</h3>
+        <p class="modal-intro" style="margin-bottom:8px;">
+          초와 정을 더 잘게 나눈 것이 <b>각(刻)</b>이에요.
+        </p>
+        <ul class="modal-facts">
+          <li>초(初)와 정(正) 각각을 <b>4등분</b>해요. → 1각 = <b>약 15분</b></li>
+          <li>午正 1각 = 12:00~12:15, 午正 2각 = 12:15~12:30, ...</li>
+          <li>하루 전체: 12시진 × 2(초·정) × 4각 = <b>96각</b></li>
+        </ul>
+        <div style="margin-top:12px; padding:10px; background:rgba(255,215,0,0.1); border-radius:8px; border-left:3px solid #FFD700;">
+          <b>예시로 읽어볼까요?</b><br>
+          오후 2시 30분 = <b>未正 2각</b> 🐑<br>
+          <span class="guide-desc">→ 미(未)시의 정(正, 뒤쪽 1시간) 중 2번째 각(15분 단위)</span>
+        </div>
+      </div>
+
+      <div class="modal-section" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:12px; margin-top:8px;">
+        <p class="guide-desc" style="font-size:0.7rem; opacity:0.6;">
+          참고: 각 동물의 시간대 설명은 전통적으로 전해지는 동물 습성 유래에 기반합니다.<br>
+          <a href="https://www.epochtimes.kr/2018/02/404077.html" target="_blank" rel="noopener" style="color:#FFD700;">12간지 동물에 담긴 비밀 (에포크타임스)</a> ·
+          <a href="https://folkency.nfm.go.kr/topic/detail/5586" target="_blank" rel="noopener" style="color:#FFD700;">열두 띠 유래 (한국민속대백과사전)</a>
+        </p>
       </div>
     </div>
   </div>

@@ -78,7 +78,7 @@ export function initUI(state, callbacks) {
       const jisin = getJisinTime(solarH, solarM);
       jisinDisplay.textContent = jisin.hanja;
       if (jisinKrDisplay) jisinKrDisplay.textContent = jisin.korean;
-      if (timeSubDisplay) timeSubDisplay.textContent = `KST ${formatTime(kstMinutes)}`;
+      if (timeSubDisplay) timeSubDisplay.textContent = `현대 시각 ${formatTime(kstMinutes)}`;
     } else {
       // 현대 모드: 메인=KST, 부가=진태양시
       timeDisplay.textContent = formatTime(kstMinutes);
@@ -289,6 +289,23 @@ export function initUI(state, callbacks) {
     });
     termsModal.addEventListener('click', (e) => {
       if (e.target === termsModal) termsModal.hidden = true;
+    });
+  }
+
+  // 12지신 시간 모달
+  const jisinBtn = document.getElementById('jisin-btn');
+  const jisinModal = document.getElementById('jisin-modal');
+  const jisinClose = jisinModal?.querySelector('.jisin-modal-close');
+
+  if (jisinBtn && jisinModal) {
+    jisinBtn.addEventListener('click', () => {
+      jisinModal.hidden = false;
+    });
+    jisinClose.addEventListener('click', () => {
+      jisinModal.hidden = true;
+    });
+    jisinModal.addEventListener('click', (e) => {
+      if (e.target === jisinModal) jisinModal.hidden = true;
     });
   }
 

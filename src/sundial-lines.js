@@ -151,9 +151,9 @@ function calcShadowProjection(decRad, hRad, latRad, R) {
 
   // 태양 방향 → Three.js 좌표계
   // SunCalc 규약: 남=0, 서쪽이 +az
-  // Three.js: x = -sin(az)*cos(alt), y = sin(alt), z = -cos(az)*cos(alt)
+  // 카메라가 남쪽(-z)에서 바라보므로 동서(x)를 반전하여 화면 오른쪽=동
   const sunDir = new THREE.Vector3(
-    -Math.sin(az) * cosAlt,
+     Math.sin(az) * cosAlt,
      sinAlt,
     -Math.cos(az) * cosAlt,
   ).normalize();
