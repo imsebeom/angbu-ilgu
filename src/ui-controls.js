@@ -20,15 +20,20 @@ export function initUI(state, callbacks) {
   // 실시간 모드 초기 상태 반영
   realtimeBtn.classList.toggle('active', state.isRealtime);
 
-  // 날짜 변경
+  // 날짜 변경 (MM-DD 형식)
   dateInput.addEventListener('change', () => {
     state.isRealtime = false;
     realtimeBtn.classList.remove('active');
     const parts = dateInput.value.split('-');
-    const d = state.currentDate;
-    d.setFullYear(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-    updateActiveTermBtn();
-    callbacks.onDateTimeChange(state.currentDate);
+    if (parts.length === 2) {
+      const month = parseInt(parts[0]);
+      const day = parseInt(parts[1]);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        state.currentDate.setMonth(month - 1, day);
+        updateActiveTermBtn();
+        callbacks.onDateTimeChange(state.currentDate);
+      }
+    }
   });
 
   // 시간 슬라이더
@@ -188,8 +193,7 @@ function updateInfoPanel(date, sunData) {
 }
 
 function formatDateForInput(date) {
-  const y = date.getFullYear();
   const m = (date.getMonth() + 1).toString().padStart(2, '0');
   const d = date.getDate().toString().padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return `${m}-${d}`;
 }
