@@ -1,16 +1,19 @@
 import * as THREE from 'three';
-import { BOWL_RADIUS, BOWL_THICKNESS, LATITUDE, DEG2RAD, SEASON_LINES, HOUR_LINES } from './constants.js';
+import { BOWL_RADIUS, BOWL_THICKNESS, LATITUDE, LONGITUDE, DEG2RAD, SEASON_LINES, HOUR_LINES } from './constants.js';
 import { createSeasonLineMaterial, createHourLineMaterial } from './materials.js';
 
 /**
  * 시각선과 절기선을 모두 생성하여 그룹으로 반환
+ * - seasonGroup: 절기선 (양쪽 모드 공통)
+ * - classicHourGroup: 원본 시각선 (진태양시 기준, 고정)
+ * - modernHourGroup: 현대 시각선 (KST 정시 기준, 날짜에 따라 변경)
  */
-export function createAllLines() {
+export function createAllLines(date) {
   const group = new THREE.Group();
   const seasonMat = createSeasonLineMaterial();
   const hourMat = createHourLineMaterial();
 
-  // === 절기선 (가로 곡선) - 금색 계열 ===
+  // === 절기선 (가로 곡선) - 금색 계열 (공통) ===
   for (const season of SEASON_LINES) {
     const points = calculateDeclinationCurve(season.declination);
     if (points.length > 3) {
@@ -19,17 +22,101 @@ export function createAllLines() {
     }
   }
 
-  // === 시각선 (세로 곡선) - 검은색 계열 ===
+  // === 원본 시각선 (진태양시 기준, 고정) ===
+  const classicHourGroup = new THREE.Group();
+  classicHourGroup.name = 'hour-lines-classic';
   for (const hour of HOUR_LINES) {
     const points = calculateHourCurve(hour.hourAngle);
+    if (points.length > 3) {
+      const thickness = hour.type === 'major' ? 0.002 : 0.001;
+      const line = createLineOnBowl(points, hourMat, thickness);
+      classicHourGroup.add(line);
+    }
+  }
+  group.add(classicHourGroup);
+
+  // === 현대 시각선 (KST 정시 기준, 날짜에 따라 변경) ===
+  const modernHourGroup = new THREE.Group();
+  modernHourGroup.name = 'hour-lines-modern';
+  _buildModernHourLines(modernHourGroup, hourMat, date || new Date());
+  group.add(modernHourGroup);
+
+  // 기본: 현대 모드 표시
+  classicHourGroup.visible = false;
+
+  return group;
+}
+
+/**
+ * 현대 모드 시각선을 날짜 기반으로 재생성
+ * KST 정시(6:00~18:00)를 진태양시 시간각으로 변환하여 격자선 위치를 결정
+ */
+export function updateModernHourLines(linesGroup, date) {
+  const modernGroup = linesGroup.getObjectByName('hour-lines-modern');
+  if (!modernGroup) return;
+
+  // 기존 자식 모두 제거
+  while (modernGroup.children.length > 0) {
+    const child = modernGroup.children[0];
+    modernGroup.remove(child);
+    if (child.geometry) child.geometry.dispose();
+  }
+
+  const hourMat = createHourLineMaterial();
+  _buildModernHourLines(modernGroup, hourMat, date);
+}
+
+/**
+ * 시각선 모드 전환: 'modern' 또는 'classic'
+ */
+export function setHourLineMode(linesGroup, mode) {
+  const classic = linesGroup.getObjectByName('hour-lines-classic');
+  const modern = linesGroup.getObjectByName('hour-lines-modern');
+  if (classic) classic.visible = (mode === 'classic');
+  if (modern) modern.visible = (mode === 'modern');
+}
+
+// 내부: 현대 모드 시각선 빌드
+function _buildModernHourLines(group, hourMat, date) {
+  // 균시차 + 경도 보정 계산
+  const correction = _calcCorrectionMinutes(date);
+
+  // KST 정시(6~18시)에 대한 시각선 생성
+  // HOUR_LINES의 구조를 참고하여 동일한 시간 범위 사용
+  for (const hour of HOUR_LINES) {
+    // 이 시각선의 KST 시간 = hour.hour (6, 7, 8, ..., 18)
+    const kstHour = hour.hour;
+
+    // KST 정시 → 진태양시 시간각으로 변환
+    // solarTime = kstHour + correction/60
+    // hourAngle = (solarTime - 12) * 15
+    const solarTime = kstHour + correction / 60;
+    const hourAngleDeg = (solarTime - 12) * 15;
+
+    const points = calculateHourCurve(hourAngleDeg);
     if (points.length > 3) {
       const thickness = hour.type === 'major' ? 0.002 : 0.001;
       const line = createLineOnBowl(points, hourMat, thickness);
       group.add(line);
     }
   }
+}
 
-  return group;
+// 균시차 + 경도 보정 계산 (분 단위)
+function _calcCorrectionMinutes(date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const dayOfYear = diff / 86400000;
+  const gamma = 2 * Math.PI * (dayOfYear - 1) / 365;
+
+  const eqTime = 229.18 * (0.000075
+    + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+    - 0.014615 * Math.cos(2 * gamma) - 0.04089 * Math.sin(2 * gamma));
+
+  const standardMeridian = 135;
+  const longitudeCorrection = 4 * (LONGITUDE - standardMeridian);
+
+  return eqTime + longitudeCorrection;
 }
 
 /**

@@ -128,8 +128,9 @@ function createSeasonLabels(parent, mode) {
 }
 
 // ----- 시각선 라벨 -----
-// mode='modern' → KST 시간 (동적 업데이트) + 부제 한자
-// mode='classic' → 한자 큰 글씨 + 부제 한글
+// mode='modern' → KST 정시 표시 (격자선이 KST 정시에 맞춰져 있으므로 고정 라벨)
+//                 라벨 위치는 날짜에 따라 동적 업데이트 (격자선 위치와 동기화)
+// mode='classic' → 한자 큰 글씨 + 부제 한글 (진태양시 기준, 고정)
 function createHourLabels(parent, mode) {
   for (const hour of HOUR_LINES) {
     const hRad = hour.hourAngle * DEG2RAD;
@@ -151,7 +152,7 @@ function createHourLabels(parent, mode) {
     const azAngle = Math.atan2(x, -zPos);
 
     if (mode === 'classic') {
-      // === 원본 모드: 한자 큰 글씨 ===
+      // === 원본 모드: 한자 큰 글씨 (진태양시 기준, 고정 위치) ===
       const mainText = new Text();
       mainText.text = hour.label;
       mainText.fontSize = hour.type === 'major' ? 0.036 : 0.024;
@@ -186,10 +187,12 @@ function createHourLabels(parent, mode) {
         parent.add(subText);
       }
     } else {
-      // === 현대 모드: KST 시간 (동적 업데이트 가능) ===
+      // === 현대 모드: KST 정시 표시 ===
+      // 격자선이 KST 정시에 맞춰져 있으므로 라벨은 고정 정시 표시
+      // 라벨 위치는 updateModernHourLabels()에서 날짜에 따라 동적 갱신
       const mainText = new Text();
       mainText.name = `hour-modern-${hour.hourAngle}`;
-      mainText.text = `${hour.hour}:00`; // 초기값, updateModernHourLabels()로 갱신
+      mainText.text = `${hour.hour}:00`;
       mainText.fontSize = hour.type === 'major' ? 0.032 : 0.022;
       mainText.color = hour.type === 'major' ? '#FFF8E7' : '#E8D5B0';
       mainText.font = FONT_URL;
@@ -206,6 +209,7 @@ function createHourLabels(parent, mode) {
       // 한자 (부제, 안쪽 작게) - major만
       if (hour.type === 'major') {
         const subText = new Text();
+        subText.name = `hour-modern-sub-${hour.hourAngle}`;
         subText.text = `${hour.label}(${hour.name})`;
         subText.fontSize = 0.018;
         subText.color = '#FFD700';
@@ -226,49 +230,95 @@ function createHourLabels(parent, mode) {
 }
 
 /**
- * 현대 모드 시각 라벨을 날짜 기반 KST로 업데이트
- * 균시차 + 경도보정을 적용하여 각 시각선이 실제로 KST 몇 시에 해당하는지 표시
+ * 현대 모드 시각 라벨 위치를 날짜에 맞게 업데이트
+ * 격자선이 KST 정시에 맞춰져 있으므로, 라벨 위치도 격자선과 동기화
+ * KST 정시 → 진태양시 시간각 → 반구 내 위치 계산
  */
 export function updateModernHourLabels(labelsGroup, date) {
   const modernGroup = labelsGroup.getObjectByName('labels-modern');
   if (!modernGroup) return;
 
-  // 균시차 + 경도보정 계산 (sun-position.js의 calcHourAngleAndDec와 동일 로직)
-  const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date - start;
-  const dayOfYear = diff / 86400000;
-  const gamma = 2 * Math.PI * (dayOfYear - 1) / 365;
-
-  // Spencer 균시차 (분)
-  const eqTime = 229.18 * (0.000075
-    + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
-    - 0.014615 * Math.cos(2 * gamma) - 0.04089 * Math.sin(2 * gamma));
-
-  // 경도 보정 (분): KST 기준 경도 135°E, 서울 126.978°E
-  const standardMeridian = 135;
-  const longitudeCorrection = 4 * (LONGITUDE - standardMeridian); // 약 -32분
-
-  // 진태양시 12:00 (H=0°) = KST (12 - (eqTime + lonCorr)/60) 시
-  // 즉 시간각 H도의 시각선은 KST = (12 + H/15) - (eqTime + lonCorr)/60
-  const correctionMinutes = eqTime + longitudeCorrection; // 총 보정 (분)
+  // 균시차 + 경도보정 계산
+  const correction = _calcCorrectionMinutes(date);
 
   for (const hour of HOUR_LINES) {
     const textObj = modernGroup.getObjectByName(`hour-modern-${hour.hourAngle}`);
     if (!textObj) continue;
 
-    // 진태양시 = 12 + hourAngle/15 (시)
-    const apparentSolarHour = 12 + hour.hourAngle / 15;
-    // KST = 진태양시 - 보정 (분을 시로 변환)
-    const kstHour = apparentSolarHour - correctionMinutes / 60;
+    // KST 정시 → 진태양시 시간각
+    const kstHour = hour.hour;
+    const solarTime = kstHour + correction / 60;
+    const hourAngleDeg = (solarTime - 12) * 15;
 
-    const kstH = Math.floor(kstHour);
-    const kstM = Math.round((kstHour - kstH) * 60);
-    const hStr = kstH.toString().padStart(2, '0');
-    const mStr = Math.abs(kstM).toString().padStart(2, '0');
-
-    textObj.text = `${hStr}:${mStr}`;
+    // 라벨 위치 계산 (시간각 기반)
+    const pos = _calcHourLabelPosition(hourAngleDeg);
+    if (pos) {
+      textObj.position.set(pos.x, -0.02, pos.z);
+      textObj.rotation.x = -Math.PI / 2;
+      textObj.rotation.z = -pos.azAngle + Math.PI;
+      textObj.visible = true;
+    } else {
+      textObj.visible = false;
+    }
     textObj.sync();
+
+    // 부제 라벨도 업데이트
+    const subObj = modernGroup.getObjectByName(`hour-modern-sub-${hour.hourAngle}`);
+    if (subObj) {
+      if (pos) {
+        const rInner = BOWL_RADIUS - 0.04 - 0.07;
+        const xInner = -Math.sin(pos.az) * rInner;
+        const zInner = -Math.cos(pos.az) * rInner;
+        subObj.position.set(xInner, -0.02, zInner);
+        subObj.rotation.x = -Math.PI / 2;
+        subObj.rotation.z = -pos.azAngle + Math.PI;
+        subObj.visible = true;
+      } else {
+        subObj.visible = false;
+      }
+      subObj.sync();
+    }
   }
+}
+
+// 시간각으로부터 라벨 위치 계산 (적위=0° 기준, 지평환 근처)
+function _calcHourLabelPosition(hourAngleDeg) {
+  const hRad = hourAngleDeg * DEG2RAD;
+  const latRad = LATITUDE * DEG2RAD;
+
+  const sinAlt = Math.cos(latRad) * Math.cos(hRad);
+  if (sinAlt <= 0) return null;
+
+  const alt = Math.asin(sinAlt);
+  const cosAlt = Math.cos(alt);
+  let cosAz = -Math.sin(latRad) * sinAlt / (Math.cos(latRad) * cosAlt);
+  cosAz = Math.max(-1, Math.min(1, cosAz));
+  let az = Math.acos(cosAz);
+  if (hourAngleDeg > 0) az = -az;
+
+  const r = BOWL_RADIUS - 0.04;
+  const x = -Math.sin(az) * r;
+  const z = -Math.cos(az) * r;
+  const azAngle = Math.atan2(x, -z);
+
+  return { x, z, az, azAngle };
+}
+
+// 균시차 + 경도 보정 계산 (분 단위)
+function _calcCorrectionMinutes(date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const dayOfYear = diff / 86400000;
+  const gamma = 2 * Math.PI * (dayOfYear - 1) / 365;
+
+  const eqTime = 229.18 * (0.000075
+    + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+    - 0.014615 * Math.cos(2 * gamma) - 0.04089 * Math.sin(2 * gamma));
+
+  const standardMeridian = 135;
+  const longitudeCorrection = 4 * (LONGITUDE - standardMeridian);
+
+  return eqTime + longitudeCorrection;
 }
 
 // ----- 공통: 반구 내면에 텍스트 방향 맞추기 -----
