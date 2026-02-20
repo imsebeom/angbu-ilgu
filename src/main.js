@@ -7,15 +7,17 @@ import { createAllLabels, setLabelMode, updateModernHourLabels } from './text-la
 import { initUI } from './ui-controls.js';
 
 // ===== 상태 =====
-// 기본: 하지(6/21) 정오, 정지 모드 (실시간은 수동 활성화)
+// 기본: 춘분(3/21) 정오, 정지 모드, 진태양시(classic) 모드
 const defaultDate = new Date();
-defaultDate.setMonth(5, 21); // 6월 21일 (하지)
+defaultDate.setMonth(2, 21); // 3월 21일 (춘분)
 defaultDate.setHours(12, 0, 0, 0);
 const state = {
   currentDate: defaultDate,
   isRealtime: false,
   speed: 0,  // 0=정지, 1=실시간, 60=1분/초, 3600=1시간/초
-  labelMode: 'modern', // 현재 모드 추적
+  dateOnly: false, // true이면 시각 고정, 날짜만 진행
+  _dayAccum: 0, // 날짜 진행 누적값
+  labelMode: 'classic', // 현재 모드 추적 (기본: 진태양시)
 };
 
 // ===== 씬 초기화 =====
@@ -37,6 +39,10 @@ angbuGroup.add(labelsGroup);
 // ===== 그림자 마커 =====
 const shadowMarker = createShadowMarker();
 scene.add(shadowMarker);
+
+// ===== 기본 모드: 진태양시(classic) =====
+setLabelMode(labelsGroup, 'classic');
+setHourLineMode(linesGroup, 'classic');
 
 // ===== UI 초기화 =====
 const ui = initUI(state, {
@@ -90,8 +96,29 @@ function animate(now) {
   if (state.isRealtime) {
     state.currentDate = new Date();
   } else if (state.speed > 0) {
-    const advance = delta * state.speed * 1000; // 밀리초
-    state.currentDate = new Date(state.currentDate.getTime() + advance);
+    if (state.dateOnly) {
+      // 날짜만 진행 모드: 시각 고정, 날짜만 변경
+      const daysPerSec = state.speed / 86400;
+      state._dayAccum = (state._dayAccum || 0) + delta * daysPerSec;
+      if (state._dayAccum >= 1) {
+        const daysToAdd = Math.floor(state._dayAccum);
+        state._dayAccum -= daysToAdd;
+        const h = state.currentDate.getHours();
+        const m = state.currentDate.getMinutes();
+        state.currentDate.setDate(state.currentDate.getDate() + daysToAdd);
+        state.currentDate.setHours(h, m, 0, 0);
+      }
+    } else {
+      const advance = delta * state.speed * 1000; // 밀리초
+      const next = new Date(state.currentDate.getTime() + advance);
+      const h = next.getHours();
+      // 배속 모드: 20시~04시 구간 건너뛰기
+      if (h >= 20 || h < 4) {
+        next.setDate(next.getDate() + (h >= 20 ? 1 : 0));
+        next.setHours(4, 0, 0, 0);
+      }
+      state.currentDate = next;
+    }
   }
 
   // 씬 업데이트

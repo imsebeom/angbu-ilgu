@@ -74,19 +74,54 @@ body {
   letter-spacing: 0.08em;
 }
 
-.control-group input[type="date"] {
-  width: 100%;
-  padding: 6px 10px;
+.date-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(205, 127, 50, 0.3);
   border-radius: 6px;
-  color: #e0d5c1;
-  font-size: 0.85rem;
-  outline: none;
+  padding: 4px 8px;
 }
 
-.control-group input[type="date"]:focus {
-  border-color: #CD7F32;
+.spinner-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.spin-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e0d5c1;
+  font-variant-numeric: tabular-nums;
+  min-width: 24px;
+  text-align: center;
+  line-height: 1;
+}
+
+.spin-btn {
+  background: none;
+  border: none;
+  color: #6b6357;
+  font-size: 0.5rem;
+  cursor: pointer;
+  padding: 1px 6px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.spin-btn:hover {
+  color: #CD7F32;
+}
+
+.spin-sep {
+  color: #6b6357;
+  font-size: 0.9rem;
+  margin: 0 1px;
+  align-self: center;
 }
 
 /* === 슬라이더 === */
@@ -137,10 +172,22 @@ input[type="range"]::-moz-range-thumb {
   font-variant-numeric: tabular-nums;
 }
 
+.jisin-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+
 .hanja-value {
   font-size: 1.2rem;
   color: #CD7F32;
   font-weight: 600;
+}
+
+.jisin-kr {
+  font-size: 0.7rem;
+  color: #8a7e6b;
 }
 
 /* === 배속 컨트롤 === */
@@ -240,9 +287,17 @@ input[type="range"]::-moz-range-thumb {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(205, 127, 50, 0.2);
   border-radius: 10px;
-  padding: 4px 6px;
+  padding: 4px 6px 6px;
   max-width: calc(100vw - 40px);
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#term-slider {
+  width: calc(100% - 8px);
+  height: 3px;
+  margin: 2px 4px 0;
+  flex-basis: 100%;
 }
 
 .term-btn {
@@ -321,31 +376,100 @@ input[type="range"]::-moz-range-thumb {
   color: #e8d5a0;
 }
 
-/* === 도움말 버튼 === */
-#help-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(205, 127, 50, 0.2);
-  border: 1.5px solid rgba(205, 127, 50, 0.5);
-  color: #CD7F32;
-  font-size: 1.2rem;
-  font-weight: 700;
+/* === 24절기 버튼 === */
+#terms-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  background: rgba(124, 184, 124, 0.15);
+  border: 1.5px solid rgba(124, 184, 124, 0.4);
+  color: #7cb87c;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
-  z-index: 15;
   transition: all 0.25s;
   backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+#terms-btn:hover {
+  background: rgba(124, 184, 124, 0.3);
+  border-color: #7cb87c;
+}
+
+/* 24절기 테이블 */
+.terms-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 4px;
+}
+
+.terms-table tr {
+  border-bottom: 1px solid rgba(205, 127, 50, 0.1);
+}
+
+.terms-table td {
+  padding: 4px 3px;
+  font-size: 0.78rem;
+  color: #b5a895;
+  vertical-align: middle;
+}
+
+.t-hanja {
+  color: #CD7F32;
+  font-weight: 600;
+  width: 36px;
+}
+
+.t-name {
+  color: #e0d5c1;
+  font-weight: 500;
+  width: 32px;
+}
+
+.t-date {
+  color: #8a7e6b;
+  width: 36px;
+  font-variant-numeric: tabular-nums;
+}
+
+.t-desc {
+  color: #9a8e7e;
+  font-size: 0.73rem;
+}
+
+.t-highlight td {
+  padding: 5px 3px;
+}
+
+.t-highlight.spring td { color: #90d890; }
+.t-highlight.summer td { color: #e8a840; }
+.t-highlight.autumn td { color: #e08040; }
+.t-highlight.winter td { color: #88bbee; }
+.t-highlight .t-hanja { font-weight: 700; }
+.t-highlight .t-name { font-weight: 700; }
+
+/* === 도움말 버튼 === */
+#help-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  background: rgba(205, 127, 50, 0.15);
+  border: 1.5px solid rgba(205, 127, 50, 0.4);
+  color: #CD7F32;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
 }
 
 #help-btn:hover {
-  background: rgba(205, 127, 50, 0.4);
+  background: rgba(205, 127, 50, 0.3);
   border-color: #CD7F32;
-  transform: scale(1.1);
-  box-shadow: 0 0 16px rgba(205, 127, 50, 0.35);
 }
 
 /* === 도움말 모달 === */

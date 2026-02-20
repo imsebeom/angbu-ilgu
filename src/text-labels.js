@@ -141,23 +141,15 @@ function createSeasonLabels(parent, mode) {
 // mode='classic' → 한자 큰 글씨 + 부제 한글 (진태양시 기준, 고정)
 function createHourLabels(parent, mode) {
   for (const hour of HOUR_LINES) {
-    const hRad = hour.hourAngle * DEG2RAD;
-    const latRad = LATITUDE * DEG2RAD;
+    // 격자선 상단 끝점을 찾아서 라벨 배치
+    const pos = _calcHourLabelPosition(hour.hourAngle);
+    if (!pos) continue;
 
-    const sinAlt = Math.cos(latRad) * Math.cos(hRad);
-    if (sinAlt <= 0) continue;
-
-    const alt = Math.asin(sinAlt);
-    const cosAlt = Math.cos(alt);
-    let cosAz = -Math.sin(latRad) * sinAlt / (Math.cos(latRad) * cosAlt);
-    cosAz = Math.max(-1, Math.min(1, cosAz));
-    let az = Math.acos(cosAz);
-    if (hour.hourAngle > 0) az = -az;
-
-    const r = BOWL_RADIUS - 0.04;
-    const x = -Math.sin(az) * r;
-    const zPos = -Math.cos(az) * r;
-    const azAngle = Math.atan2(x, -zPos);
+    const x = pos.x;
+    const zPos = pos.z;
+    const az = pos.az;
+    const azAngle = pos.azAngle;
+    const labelY = Math.min(pos.y + 0.03, -0.01);
 
     if (mode === 'classic') {
       // === 원본 모드: 한자 큰 글씨 (진태양시 기준, 고정 위치) ===
@@ -168,7 +160,7 @@ function createHourLabels(parent, mode) {
       mainText.font = FONT_URL;
       mainText.anchorX = 'center';
       mainText.anchorY = 'middle';
-      mainText.position.set(x, -0.02, zPos);
+      mainText.position.set(x, labelY, zPos);
       mainText.rotation.x = -Math.PI / 2;
       mainText.rotation.z = -azAngle;
       mainText.depthOffset = -0.1;
@@ -185,8 +177,8 @@ function createHourLabels(parent, mode) {
         subText.font = FONT_URL;
         subText.anchorX = 'center';
         subText.anchorY = 'middle';
-        const rInner = r - 0.07;
-        subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
+        const subY = pos.y - 0.02;
+        subText.position.set(x, subY, zPos);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle;
         subText.depthOffset = -0.1;
@@ -206,7 +198,7 @@ function createHourLabels(parent, mode) {
       mainText.font = FONT_URL;
       mainText.anchorX = 'center';
       mainText.anchorY = 'middle';
-      mainText.position.set(x, -0.02, zPos);
+      mainText.position.set(x, labelY, zPos);
       mainText.rotation.x = -Math.PI / 2;
       mainText.rotation.z = -azAngle;
       mainText.depthOffset = -0.1;
@@ -224,8 +216,8 @@ function createHourLabels(parent, mode) {
         subText.font = FONT_URL;
         subText.anchorX = 'center';
         subText.anchorY = 'middle';
-        const rInner = r - 0.07;
-        subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
+        const subY = pos.y - 0.02;
+        subText.position.set(x, subY, zPos);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle;
         subText.depthOffset = -0.1;
@@ -258,10 +250,12 @@ export function updateModernHourLabels(labelsGroup, date) {
     const solarTime = kstHour + correction / 60;
     const hourAngleDeg = (solarTime - 12) * 15;
 
-    // 라벨 위치 계산 (시간각 기반)
+    // 라벨 위치 계산 (시간각 기반, 격자선 상단 끝점)
     const pos = _calcHourLabelPosition(hourAngleDeg);
     if (pos) {
-      textObj.position.set(pos.x, -0.02, pos.z);
+      // 라벨을 격자선 상단 끝보다 약간 위(지평환 쪽)에 배치
+      const labelY = Math.min(pos.y + 0.03, -0.01);
+      textObj.position.set(pos.x, labelY, pos.z);
       textObj.rotation.x = -Math.PI / 2;
       textObj.rotation.z = -pos.azAngle;
       textObj.visible = true;
@@ -274,10 +268,9 @@ export function updateModernHourLabels(labelsGroup, date) {
     const subObj = modernGroup.getObjectByName(`hour-modern-sub-${hour.hourAngle}`);
     if (subObj) {
       if (pos) {
-        const rInner = BOWL_RADIUS - 0.04 - 0.07;
-        const xInner = -Math.sin(pos.az) * rInner;
-        const zInner = -Math.cos(pos.az) * rInner;
-        subObj.position.set(xInner, -0.02, zInner);
+        // 부제를 메인 라벨 아래(반구 안쪽)에 배치
+        const subY = pos.y - 0.02;
+        subObj.position.set(pos.x, subY, pos.z);
         subObj.rotation.x = -Math.PI / 2;
         subObj.rotation.z = -pos.azAngle;
         subObj.visible = true;
@@ -286,30 +279,71 @@ export function updateModernHourLabels(labelsGroup, date) {
       }
       subObj.sync();
     }
+
+    // 춘분선 교차점 라벨도 업데이트
+    const eqObj = modernGroup.getObjectByName(`equinox-modern-${hour.hourAngle}`);
+    if (eqObj) {
+      const labelOffsetDec = -2;
+      const eqPt = calcLabelPosition(labelOffsetDec, hourAngleDeg);
+      if (eqPt) {
+        eqObj.position.copy(eqPt);
+        orientTextOnBowl(eqObj, eqPt, true);
+        eqObj.visible = true;
+      } else {
+        eqObj.visible = false;
+      }
+      eqObj.sync();
+    }
   }
 }
 
-// 시간각으로부터 라벨 위치 계산 (적위=0° 기준, 지평환 근처)
+// 시간각으로부터 라벨 위치 계산
+// 격자선의 지평환 근처(상단 끝점)를 찾아서 라벨 배치
 function _calcHourLabelPosition(hourAngleDeg) {
   const hRad = hourAngleDeg * DEG2RAD;
   const latRad = LATITUDE * DEG2RAD;
+  const R = BOWL_RADIUS - BOWL_THICKNESS - 0.002;
 
-  const sinAlt = Math.cos(latRad) * Math.cos(hRad);
-  if (sinAlt <= 0) return null;
+  // 격자선의 상단 끝점(y≈0 근처)을 찾기 위해 적위를 스캔
+  // 격자선은 dec=-23.44~+23.44를 순회하며 그림자 점을 계산
+  // y가 가장 0에 가까운(지평환에 가장 가까운) 점을 라벨 위치로 사용
+  let bestPt = null;
+  let bestY = -Infinity;
 
-  const alt = Math.asin(sinAlt);
-  const cosAlt = Math.cos(alt);
-  let cosAz = -Math.sin(latRad) * sinAlt / (Math.cos(latRad) * cosAlt);
-  cosAz = Math.max(-1, Math.min(1, cosAz));
-  let az = Math.acos(cosAz);
-  if (hourAngleDeg > 0) az = -az;
+  for (let dec = -23.44; dec <= 23.44; dec += 0.5) {
+    const decRad = dec * DEG2RAD;
+    const sinAlt = Math.sin(latRad) * Math.sin(decRad)
+                 + Math.cos(latRad) * Math.cos(decRad) * Math.cos(hRad);
+    if (sinAlt <= 0.01) continue;
 
-  const r = BOWL_RADIUS - 0.04;
-  const x = -Math.sin(az) * r;
-  const z = -Math.cos(az) * r;
-  const azAngle = Math.atan2(x, -z);
+    const alt = Math.asin(sinAlt);
+    const cosAlt = Math.cos(alt);
+    if (cosAlt < 0.001) continue;
 
-  return { x, z, az, azAngle };
+    let cosAzNorth = (Math.sin(decRad) - Math.sin(latRad) * sinAlt)
+              / (Math.cos(latRad) * cosAlt);
+    cosAzNorth = Math.max(-1, Math.min(1, cosAzNorth));
+    let azNorth = Math.acos(cosAzNorth);
+    if (Math.sin(hRad) > 0) azNorth = 2 * Math.PI - azNorth;
+    const az = azNorth - Math.PI;
+
+    const sunDir = new THREE.Vector3(
+      -Math.sin(az) * cosAlt,
+      sinAlt,
+      -Math.cos(az) * cosAlt,
+    ).normalize();
+    const pt = sunDir.clone().negate().multiplyScalar(R);
+
+    if (pt.y < 0 && pt.y > bestY) {
+      bestY = pt.y;
+      const x = pt.x;
+      const z = pt.z;
+      const azAngle = Math.atan2(x, -z);
+      bestPt = { x, y: pt.y, z, az, azAngle };
+    }
+  }
+
+  return bestPt;
 }
 
 // 균시차 + 경도 보정 계산 (분 단위)
@@ -371,6 +405,8 @@ function createEquinoxLineLabels(parent, mode) {
     if (mode === 'classic') {
       text.text = hour.label;
     } else {
+      // 현대 모드: name 부여하여 동적 업데이트 가능
+      text.name = `equinox-modern-${hour.hourAngle}`;
       text.text = `${hour.hour}시`;
     }
     text.fontSize = 0.018;
