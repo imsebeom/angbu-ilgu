@@ -66,7 +66,11 @@ function createZodiacLabels(parent) {
     const x = -Math.sin(angleRad) * r;  // x반전: 화면 오른쪽=동
     const zPos = Math.cos(angleRad) * r;  // 子=0°=북=+z
 
-    // 한자 (위)
+    // 글자가 바깥→중심 방향으로 읽히도록 회전 각도 계산
+    // rotation.x=-PI/2로 눕힌 상태에서 rotation.z로 방위 회전
+    const facingAngle = Math.atan2(x, zPos);
+
+    // 한자 (안쪽)
     const hanjaText = new Text();
     hanjaText.text = z.char;
     hanjaText.fontSize = 0.042;
@@ -76,12 +80,12 @@ function createZodiacLabels(parent) {
     hanjaText.anchorY = 'middle';
     hanjaText.position.set(x, 0.035, zPos);
     hanjaText.rotation.x = -Math.PI / 2;
-    hanjaText.rotation.z = angleRad + Math.PI;
+    hanjaText.rotation.z = facingAngle + Math.PI;
     hanjaText.depthOffset = -0.1;
     hanjaText.sync();
     parent.add(hanjaText);
 
-    // 한글 (아래, 더 작게)
+    // 한글 (바깥쪽, 더 작게)
     const korText = new Text();
     korText.text = z.name;
     korText.fontSize = 0.024;
@@ -90,13 +94,12 @@ function createZodiacLabels(parent) {
     korText.anchorX = 'center';
     korText.anchorY = 'middle';
 
-    // 한자보다 바깥쪽에 배치
     const rOuter = r + 0.04;
-    const xOuter = -Math.sin(angleRad) * rOuter;  // x반전
+    const xOuter = -Math.sin(angleRad) * rOuter;
     const zOuter = Math.cos(angleRad) * rOuter;
     korText.position.set(xOuter, 0.035, zOuter);
     korText.rotation.x = -Math.PI / 2;
-    korText.rotation.z = angleRad + Math.PI;
+    korText.rotation.z = facingAngle + Math.PI;
     korText.depthOffset = -0.1;
     korText.sync();
     parent.add(korText);
@@ -126,9 +129,9 @@ function createSeasonLabels(parent, mode) {
       text.anchorY = 'middle';
 
       text.position.set(pt.x + side.offsetX, pt.y, pt.z);
-      orientTextOnBowl(text, pt);
+      orientTextOnBowl(text, pt, true);
 
-      text.depthOffset = -0.1;
+      text.depthOffset = -0.02;
       text.sync();
       parent.add(text);
     }
@@ -163,8 +166,7 @@ function createHourLabels(parent, mode) {
       mainText.position.set(x, labelY, zPos);
       mainText.rotation.x = -Math.PI / 2;
       mainText.rotation.z = -azAngle;
-      mainText.depthOffset = -0.1;
-      mainText.renderOrder = 10;
+      mainText.depthOffset = -0.02;
       mainText.sync();
       parent.add(mainText);
 
@@ -181,8 +183,7 @@ function createHourLabels(parent, mode) {
         subText.position.set(x, subY, zPos);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle;
-        subText.depthOffset = -0.1;
-        subText.renderOrder = 10;
+        subText.depthOffset = -0.02;
         subText.sync();
         parent.add(subText);
       }
@@ -201,8 +202,7 @@ function createHourLabels(parent, mode) {
       mainText.position.set(x, labelY, zPos);
       mainText.rotation.x = -Math.PI / 2;
       mainText.rotation.z = -azAngle;
-      mainText.depthOffset = -0.1;
-      mainText.renderOrder = 10;
+      mainText.depthOffset = -0.02;
       mainText.sync();
       parent.add(mainText);
 
@@ -220,8 +220,7 @@ function createHourLabels(parent, mode) {
         subText.position.set(x, subY, zPos);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle;
-        subText.depthOffset = -0.1;
-        subText.renderOrder = 10;
+        subText.depthOffset = -0.02;
         subText.sync();
         parent.add(subText);
       }
@@ -384,8 +383,7 @@ function createNoonLineLabels(parent, mode) {
     text.position.copy(pt);
     orientTextOnBowl(text, pt, true);
 
-    text.depthOffset = -0.2;
-    text.renderOrder = 1;
+    text.depthOffset = -0.02;
     text.sync();
     parent.add(text);
   }
@@ -418,8 +416,7 @@ function createEquinoxLineLabels(parent, mode) {
     text.position.copy(pt);
     orientTextOnBowl(text, pt, true);
 
-    text.depthOffset = -0.2;
-    text.renderOrder = 1;
+    text.depthOffset = -0.02;
     text.sync();
     parent.add(text);
   }
