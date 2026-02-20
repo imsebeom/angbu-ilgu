@@ -27,6 +27,7 @@ export function initUI(state, callbacks) {
     const parts = dateInput.value.split('-');
     const d = state.currentDate;
     d.setFullYear(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    updateActiveTermBtn();
     callbacks.onDateTimeChange(state.currentDate);
   });
 
@@ -64,6 +65,33 @@ export function initUI(state, callbacks) {
       speedBtns.forEach(b => b.classList.remove('active'));
       speedBtns[1].classList.add('active'); // 1x
     }
+  });
+
+  // 절기 선택 버튼
+  const termBtns = document.querySelectorAll('.term-btn');
+  function updateActiveTermBtn() {
+    const m = state.currentDate.getMonth() + 1;
+    const d = state.currentDate.getDate();
+    termBtns.forEach(btn => {
+      const bm = parseInt(btn.dataset.month);
+      const bd = parseInt(btn.dataset.day);
+      btn.classList.toggle('active', bm === m && bd === d);
+    });
+  }
+  updateActiveTermBtn();
+
+  termBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.isRealtime = false;
+      realtimeBtn.classList.remove('active');
+      const month = parseInt(btn.dataset.month);
+      const day = parseInt(btn.dataset.day);
+      state.currentDate.setMonth(month - 1, day);
+      // 날짜 입력 업데이트
+      dateInput.value = formatDateForInput(state.currentDate);
+      updateActiveTermBtn();
+      callbacks.onDateTimeChange(state.currentDate);
+    });
   });
 
   // 모드 전환 버튼
@@ -108,6 +136,9 @@ export function initUI(state, callbacks) {
 
       // 정보 패널 업데이트
       updateInfoPanel(date, sunData);
+
+      // 절기 버튼 활성 상태 업데이트
+      updateActiveTermBtn();
     }
   };
 }

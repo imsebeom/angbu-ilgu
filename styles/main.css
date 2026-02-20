@@ -227,6 +227,61 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 1px;
 }
 
+/* === 상단 절기 선택 바 === */
+#solar-term-bar {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  z-index: 15;
+  background: rgba(20, 18, 15, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(205, 127, 50, 0.2);
+  border-radius: 10px;
+  padding: 4px 6px;
+  max-width: calc(100vw - 40px);
+  flex-wrap: nowrap;
+}
+
+.term-btn {
+  padding: 3px 5px;
+  min-width: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #8a7e6b;
+  font-size: 0.58rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.term-btn:hover {
+  background: rgba(205, 127, 50, 0.15);
+  color: #e0d5c1;
+  border-color: rgba(205, 127, 50, 0.3);
+}
+
+.term-btn.active {
+  background: rgba(205, 127, 50, 0.3);
+  border-color: #CD7F32;
+  color: #CD7F32;
+  font-weight: 700;
+}
+
+/* 사계절 포인트 (춘분/하지/추분/동지) */
+.term-btn.spring { color: #7cb87c; }
+.term-btn.summer { color: #cd7f32; }
+.term-btn.autumn { color: #c47030; }
+.term-btn.spring.active { color: #90d890; border-color: #7cb87c; background: rgba(124, 184, 124, 0.2); }
+.term-btn.summer.active { color: #e8a840; border-color: #CD7F32; background: rgba(205, 127, 50, 0.3); }
+.term-btn.autumn.active { color: #e08040; border-color: #c47030; background: rgba(196, 112, 48, 0.2); }
+
 /* === 우측 하단 버튼 그룹 === */
 #bottom-right-btns {
   position: fixed;
