@@ -1,4 +1,4 @@
-import { getJisinTime, getCurrentSolarTerm, RAD2DEG, LONGITUDE } from './constants.js';
+import { getJisinTime, getCurrentSolarTerm, SOLAR_TERMS_24, RAD2DEG, LONGITUDE } from './constants.js';
 import { getAzimuthLabel } from './sun-position.js';
 
 // 균시차 + 경도 보정 (분 단위): 진태양시 = KST + correction
@@ -111,8 +111,8 @@ export function initUI(state, callbacks) {
   // 실시간 모드 초기 상태 반영
   realtimeBtn.classList.toggle('active', state.isRealtime);
 
-  // 날짜 스피너 버튼
-  document.querySelectorAll('.spin-btn').forEach(btn => {
+  // 날짜 스피너 버튼 (절기 스피너 제외)
+  document.querySelectorAll('.spin-btn[data-target]').forEach(btn => {
     btn.addEventListener('click', () => {
       state.isRealtime = false;
       realtimeBtn.classList.remove('active');
@@ -239,6 +239,55 @@ export function initUI(state, callbacks) {
       updateDateSpinner(state.currentDate);
       updateActiveTermBtn();
       callbacks.onDateTimeChange(state.currentDate);
+    });
+  }
+
+  // 절기 스피너 (날짜 옆 화살표)
+  const termUpBtn = document.getElementById('term-up');
+  const termDownBtn = document.getElementById('term-down');
+
+  function findClosestTermIndex() {
+    const m = state.currentDate.getMonth() + 1;
+    const d = state.currentDate.getDate();
+    const dayOfYear = Math.floor((m - 1) * 30.44 + d);
+    let closest = 0;
+    let minDiff = Infinity;
+    for (let i = 0; i < SOLAR_TERMS_24.length; i++) {
+      const t = SOLAR_TERMS_24[i];
+      const tDOY = Math.floor((t.month - 1) * 30.44 + t.day);
+      const diff = Math.abs(dayOfYear - tDOY);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = i;
+      }
+    }
+    return closest;
+  }
+
+  function goToTermByIndex(idx) {
+    const wrapped = ((idx % 24) + 24) % 24;
+    const term = SOLAR_TERMS_24[wrapped];
+    state.isRealtime = false;
+    realtimeBtn.classList.remove('active');
+    speedBtns.forEach(b => b.classList.remove('active'));
+    speedBtns[0].classList.add('active');
+    state.speed = 0;
+    state.currentDate.setMonth(term.month - 1, term.day);
+    updateDateSpinner(state.currentDate);
+    updateActiveTermBtn();
+    callbacks.onDateTimeChange(state.currentDate);
+  }
+
+  if (termUpBtn) {
+    termUpBtn.addEventListener('click', () => {
+      const idx = findClosestTermIndex();
+      goToTermByIndex(idx + 1);
+    });
+  }
+  if (termDownBtn) {
+    termDownBtn.addEventListener('click', () => {
+      const idx = findClosestTermIndex();
+      goToTermByIndex(idx - 1);
     });
   }
 
