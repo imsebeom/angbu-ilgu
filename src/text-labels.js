@@ -351,7 +351,7 @@ function createNoonLineLabels(parent, mode) {
     orientTextOnBowl(text, pt);
 
     text.depthOffset = -0.2;
-    text.renderOrder = 12;
+    text.renderOrder = 1;
     text.sync();
     parent.add(text);
   }
@@ -383,7 +383,7 @@ function createEquinoxLineLabels(parent, mode) {
     orientTextOnBowl(text, pt);
 
     text.depthOffset = -0.2;
-    text.renderOrder = 12;
+    text.renderOrder = 1;
     text.sync();
     parent.add(text);
   }
