@@ -1,5 +1,40 @@
-import { getJisinTime, getCurrentSolarTerm, RAD2DEG } from './constants.js';
+import { getJisinTime, getCurrentSolarTerm, RAD2DEG, LONGITUDE } from './constants.js';
 import { getAzimuthLabel } from './sun-position.js';
+
+// 균시차 + 경도 보정 (분 단위): 진태양시 = KST + correction
+function calcCorrectionMinutes(date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const dayOfYear = diff / 86400000;
+  const gamma = 2 * Math.PI * (dayOfYear - 1) / 365;
+
+  const eqTime = 229.18 * (0.000075
+    + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+    - 0.014615 * Math.cos(2 * gamma) - 0.04089 * Math.sin(2 * gamma));
+
+  const standardMeridian = 135;
+  const longitudeCorrection = 4 * (LONGITUDE - standardMeridian);
+
+  return eqTime + longitudeCorrection;
+}
+
+// KST 분 → 진태양시 분
+function kstToSolar(kstMinutes, correctionMin) {
+  return kstMinutes + correctionMin;
+}
+
+// 진태양시 분 → KST 분
+function solarToKst(solarMinutes, correctionMin) {
+  return solarMinutes - correctionMin;
+}
+
+// 분을 HH:MM 문자열로
+function formatTime(totalMinutes) {
+  let m = ((totalMinutes % 1440) + 1440) % 1440; // 0~1439 범위로
+  const h = Math.floor(m / 60);
+  const min = Math.round(m % 60);
+  return `${h.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+}
 
 /**
  * UI 컨트롤 초기화 및 이벤트 바인딩
@@ -11,8 +46,12 @@ export function initUI(state, callbacks) {
   const timeDisplay = document.getElementById('time-display');
   const jisinDisplay = document.getElementById('jisin-display');
   const jisinKrDisplay = document.getElementById('jisin-kr-display');
+  const timeSubDisplay = document.getElementById('time-sub-display');
   const realtimeBtn = document.getElementById('realtime-btn');
   const speedBtns = document.querySelectorAll('.speed-btn');
+
+  // 모드 (진태양시/현대) - 초기화 시점에 필요하므로 먼저 선언
+  let labelMode = state.labelMode || 'modern';
 
   // 날짜 스피너 표시 업데이트
   function updateDateSpinner(date) {
@@ -25,10 +64,49 @@ export function initUI(state, callbacks) {
     return new Date(year, month, 0).getDate();
   }
 
+  // 시간 표시 업데이트 (모드에 따라 진태양시/KST 전환)
+  function updateAllTimeDisplay(date) {
+    const kstMinutes = date.getHours() * 60 + date.getMinutes();
+    const correction = calcCorrectionMinutes(date);
+    const solarMinutes = kstToSolar(kstMinutes, correction);
+
+    if (labelMode === 'classic') {
+      // 진태양시 모드: 메인=진태양시, 부가=KST
+      const solarH = Math.floor(((solarMinutes % 1440) + 1440) % 1440 / 60);
+      const solarM = Math.round(((solarMinutes % 1440) + 1440) % 1440 % 60);
+      timeDisplay.textContent = formatTime(solarMinutes);
+      const jisin = getJisinTime(solarH, solarM);
+      jisinDisplay.textContent = jisin.hanja;
+      if (jisinKrDisplay) jisinKrDisplay.textContent = jisin.korean;
+      if (timeSubDisplay) timeSubDisplay.textContent = `KST ${formatTime(kstMinutes)}`;
+    } else {
+      // 현대 모드: 메인=KST, 부가=진태양시
+      timeDisplay.textContent = formatTime(kstMinutes);
+      const h = Math.floor(kstMinutes / 60);
+      const m = kstMinutes % 60;
+      const jisin = getJisinTime(h, m);
+      jisinDisplay.textContent = jisin.hanja;
+      if (jisinKrDisplay) jisinKrDisplay.textContent = jisin.korean;
+      if (timeSubDisplay) timeSubDisplay.textContent = `진태양시 ${formatTime(solarMinutes)}`;
+    }
+  }
+
+  // 슬라이더를 현재 날짜/모드에 맞게 동기화
+  function syncSliderToDate(date) {
+    const kstMinutes = date.getHours() * 60 + date.getMinutes();
+    if (labelMode === 'classic') {
+      const correction = calcCorrectionMinutes(date);
+      const solarMinutes = kstToSolar(kstMinutes, correction);
+      timeSlider.value = Math.max(0, Math.min(1440, Math.round(solarMinutes)));
+    } else {
+      timeSlider.value = kstMinutes;
+    }
+  }
+
   // 초기 날짜/시간 설정 (state 기준)
   updateDateSpinner(state.currentDate);
-  timeSlider.value = state.currentDate.getHours() * 60 + state.currentDate.getMinutes();
-  updateTimeLabels(timeSlider.value, timeDisplay, jisinDisplay, jisinKrDisplay);
+  syncSliderToDate(state.currentDate);
+  updateAllTimeDisplay(state.currentDate);
 
   // 실시간 모드 초기 상태 반영
   realtimeBtn.classList.toggle('active', state.isRealtime);
@@ -65,11 +143,21 @@ export function initUI(state, callbacks) {
   timeSlider.addEventListener('input', () => {
     state.isRealtime = false;
     realtimeBtn.classList.remove('active');
-    const minutes = parseInt(timeSlider.value);
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
+    const sliderMinutes = parseInt(timeSlider.value);
+
+    let kstMinutes;
+    if (labelMode === 'classic') {
+      // 슬라이더 = 진태양시 → KST로 환산
+      const correction = calcCorrectionMinutes(state.currentDate);
+      kstMinutes = solarToKst(sliderMinutes, correction);
+    } else {
+      kstMinutes = sliderMinutes;
+    }
+
+    const h = Math.floor(((kstMinutes % 1440) + 1440) % 1440 / 60);
+    const m = Math.round(((kstMinutes % 1440) + 1440) % 1440 % 60);
     state.currentDate.setHours(h, m, 0, 0);
-    updateTimeLabels(minutes, timeDisplay, jisinDisplay, jisinKrDisplay);
+    updateAllTimeDisplay(state.currentDate);
     callbacks.onDateTimeChange(state.currentDate);
   });
 
@@ -153,7 +241,6 @@ export function initUI(state, callbacks) {
 
   // 모드 전환 버튼
   const modeBtn = document.getElementById('mode-btn');
-  let labelMode = state.labelMode || 'modern';
 
   // 초기 버튼 상태 반영
   if (modeBtn) {
@@ -164,6 +251,9 @@ export function initUI(state, callbacks) {
       labelMode = labelMode === 'modern' ? 'classic' : 'modern';
       modeBtn.textContent = labelMode === 'modern' ? '현대 시각' : '진태양시';
       modeBtn.classList.toggle('classic', labelMode === 'classic');
+      // 모드 전환 시 슬라이더와 표시 동기화
+      syncSliderToDate(state.currentDate);
+      updateAllTimeDisplay(state.currentDate);
       if (callbacks.onLabelModeChange) callbacks.onLabelModeChange(labelMode);
     });
   }
@@ -205,10 +295,9 @@ export function initUI(state, callbacks) {
   return {
     updateDisplay(date, sunData) {
       // 시간 표시 업데이트
-      const mins = date.getHours() * 60 + date.getMinutes();
-      updateTimeLabels(mins, timeDisplay, jisinDisplay, jisinKrDisplay);
+      updateAllTimeDisplay(date);
       if (state.isRealtime || state.speed > 0) {
-        timeSlider.value = mins;
+        syncSliderToDate(date);
         updateDateSpinner(date);
       }
 
@@ -219,15 +308,6 @@ export function initUI(state, callbacks) {
       updateActiveTermBtn();
     }
   };
-}
-
-function updateTimeLabels(totalMinutes, timeEl, jisinEl, jisinKrEl) {
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  timeEl.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-  const jisin = getJisinTime(h, m);
-  jisinEl.textContent = jisin.hanja;
-  if (jisinKrEl) jisinKrEl.textContent = jisin.korean;
 }
 
 function updateInfoPanel(date, sunData) {

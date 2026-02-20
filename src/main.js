@@ -5,12 +5,32 @@ import { createShadowMarker, updateShadowMarker } from './shadow-engine.js';
 import { getSunPosition, updateSunLight } from './sun-position.js';
 import { createAllLabels, setLabelMode, updateModernHourLabels } from './text-labels.js';
 import { initUI } from './ui-controls.js';
+import { LONGITUDE } from './constants.js';
+
+// 균시차 + 경도 보정 계산 (분 단위)
+function calcCorrectionMinutes(date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const dayOfYear = diff / 86400000;
+  const gamma = 2 * Math.PI * (dayOfYear - 1) / 365;
+  const eqTime = 229.18 * (0.000075
+    + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+    - 0.014615 * Math.cos(2 * gamma) - 0.04089 * Math.sin(2 * gamma));
+  const longitudeCorrection = 4 * (LONGITUDE - 135);
+  return eqTime + longitudeCorrection;
+}
 
 // ===== 상태 =====
-// 기본: 춘분(3/21) 정오, 정지 모드, 진태양시(classic) 모드
+// 기본: 춘분(3/21) 진태양시 정오, 정지 모드, 진태양시(classic) 모드
 const defaultDate = new Date();
 defaultDate.setMonth(2, 21); // 3월 21일 (춘분)
-defaultDate.setHours(12, 0, 0, 0);
+// 진태양시 12:00 → KST로 환산 (KST = 진태양시12:00 - correction)
+defaultDate.setHours(12, 0, 0, 0); // 임시 설정 (보정값 계산용)
+const correction = calcCorrectionMinutes(defaultDate);
+const kstNoonMinutes = 12 * 60 - correction; // 진태양시 12:00 = KST 12:00 - correction
+const kstH = Math.floor(kstNoonMinutes / 60);
+const kstM = Math.round(kstNoonMinutes % 60);
+defaultDate.setHours(kstH, kstM, 0, 0);
 const state = {
   currentDate: defaultDate,
   isRealtime: false,
