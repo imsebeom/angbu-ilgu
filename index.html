@@ -65,14 +65,69 @@
       <span class="info-label">상태</span>
       <span id="sun-status" class="info-value">--</span>
     </div>
-    <hr class="info-divider">
-    <div class="info-guide">
-      <span class="info-guide-title">읽는 법</span>
-      <p><span class="guide-color season-color"></span> <b>금색 가로선</b> = 절기(계절)</p>
-      <p><span class="guide-color hour-color"></span> <b>검은 세로선</b> = 시각(시간)</p>
-      <p><span class="guide-color marker-color"></span> <b>빨간 점</b> = 지금 그림자</p>
-    </div>
   </aside>
+
+  <!-- 우측 하단: 모드 전환 + 도움말 버튼 -->
+  <div id="bottom-right-btns">
+    <button id="mode-btn" aria-label="격자 모드 전환">현대</button>
+    <button id="help-btn" aria-label="앙부일구 알아보기">!</button>
+  </div>
+
+  <!-- 도움말 모달 -->
+  <div id="help-modal" class="modal-overlay" hidden>
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close-btn" aria-label="닫기">&times;</button>
+      <h2 class="modal-title">🌞 앙부일구가 뭐예요?</h2>
+      <p class="modal-intro">
+        세종대왕이 만든 <b>해시계</b>예요!<br>
+        하늘의 해가 움직이면 가운데 뾰족한 바늘(영침)의 <b>그림자</b>가<br>
+        오목한 그릇 안쪽에 떨어져요.
+      </p>
+
+      <div class="modal-section">
+        <h3>📖 읽는 법</h3>
+        <div class="modal-guide-item">
+          <span class="guide-icon season-icon"></span>
+          <div>
+            <b>금색 가로선</b> = 절기 (계절)<br>
+            <span class="guide-desc">그림자가 어느 가로선 위에 있느냐로 계절을 알 수 있어요.</span>
+          </div>
+        </div>
+        <div class="modal-guide-item">
+          <span class="guide-icon hour-icon"></span>
+          <div>
+            <b>검은 세로선</b> = 시각 (시간)<br>
+            <span class="guide-desc">그림자가 어느 세로선 위에 있느냐로 지금 몇 시인지 알 수 있어요.</span>
+          </div>
+        </div>
+        <div class="modal-guide-item">
+          <span class="guide-icon marker-icon"></span>
+          <div>
+            <b>빨간 점</b> = 지금 그림자<br>
+            <span class="guide-desc">영침 끝의 그림자가 지금 떨어지는 위치예요.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>💡 재미있는 사실</h3>
+        <ul class="modal-facts">
+          <li>"앙부일구"는 <b>하늘을 우러러보는 가마솥 해시계</b>라는 뜻이에요.</li>
+          <li>시계가 없던 옛날, 백성들이 거리에서 시간을 볼 수 있게 만들었어요.</li>
+          <li>가로선과 세로선이 만나는 점을 읽으면 <b>계절과 시간을 동시에</b> 알 수 있어요!</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>🕹️ 조작법</h3>
+        <ul class="modal-controls">
+          <li><b>드래그</b> — 앙부일구 회전</li>
+          <li><b>스크롤</b> — 확대·축소</li>
+          <li><b>왼쪽 슬라이더</b> — 날짜·시간 변경</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <!-- 하단: 도움말 -->
   <div id="help-bar">

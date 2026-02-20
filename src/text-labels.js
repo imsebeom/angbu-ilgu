@@ -6,21 +6,46 @@ import { ZODIAC_12, SEASON_LINES, HOUR_LINES, RIM_OUTER_RADIUS, BOWL_RADIUS, BOW
 const FONT_URL = 'https://fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.otf';
 
 /**
- * 모든 텍스트 라벨을 생성하여 그룹으로 반환
+ * 두 모드의 텍스트 라벨을 생성하여 반환
+ * - modern: 현대식 (12시, 춘분·추분 등 한글)
+ * - classic: 원본 한자 (午, 春分/秋分 등)
  */
 export function createAllLabels() {
-  const group = new THREE.Group();
+  const modernGroup = new THREE.Group();
+  modernGroup.name = 'labels-modern';
 
-  // 1. 지평환: 12지신 한자 + 한글
-  createZodiacLabels(group);
+  const classicGroup = new THREE.Group();
+  classicGroup.name = 'labels-classic';
 
-  // 2. 절기선 끝 라벨 (한글, 양쪽)
-  createSeasonLabels(group);
+  // 지평환 12지신은 양쪽 공통
+  createZodiacLabels(modernGroup);
+  createZodiacLabels(classicGroup);
 
-  // 3. 시각선 끝 라벨 (현대 시간 + 한글)
-  createHourLabels(group);
+  // 절기선 라벨
+  createSeasonLabels(modernGroup, 'modern');
+  createSeasonLabels(classicGroup, 'classic');
 
-  return group;
+  // 시각선 라벨
+  createHourLabels(modernGroup, 'modern');
+  createHourLabels(classicGroup, 'classic');
+
+  // 기본: 현대 모드 표시
+  classicGroup.visible = false;
+
+  const wrapper = new THREE.Group();
+  wrapper.add(modernGroup);
+  wrapper.add(classicGroup);
+  return wrapper;
+}
+
+/**
+ * 라벨 모드 전환: 'modern' 또는 'classic'
+ */
+export function setLabelMode(labelsGroup, mode) {
+  const modern = labelsGroup.getObjectByName('labels-modern');
+  const classic = labelsGroup.getObjectByName('labels-classic');
+  if (modern) modern.visible = (mode === 'modern');
+  if (classic) classic.visible = (mode === 'classic');
 }
 
 // ----- 12지신 한자+한글 (지평환 위) -----
@@ -70,13 +95,14 @@ function createZodiacLabels(parent) {
   }
 }
 
-// ----- 절기선 라벨 (한글, 양쪽 끝) -----
-function createSeasonLabels(parent) {
+// ----- 절기선 라벨 -----
+// mode='modern' → 한글명 (동지, 춘분·추분)
+// mode='classic' → 한자명 (冬至, 春分/秋分)
+function createSeasonLabels(parent, mode) {
   for (const season of SEASON_LINES) {
-    // 양쪽 끝(동쪽/서쪽)에 라벨 배치
     const sides = [
-      { hDeg: -88, anchorX: 'right', offsetX: -0.02 },  // 동쪽 끝
-      { hDeg: 88, anchorX: 'left', offsetX: 0.02 },     // 서쪽 끝
+      { hDeg: -88, anchorX: 'right', offsetX: -0.02 },
+      { hDeg: 88, anchorX: 'left', offsetX: 0.02 },
     ];
 
     for (const side of sides) {
@@ -84,16 +110,14 @@ function createSeasonLabels(parent) {
       if (!pt) continue;
 
       const text = new Text();
-      text.text = season.name;
-      text.fontSize = 0.018;
-      text.color = '#FFD700';
+      text.text = mode === 'classic' ? season.label : season.name;
+      text.fontSize = mode === 'classic' ? 0.016 : 0.018;
+      text.color = mode === 'classic' ? '#FFF8E7' : '#FFD700';
       text.font = FONT_URL;
       text.anchorX = side.anchorX;
       text.anchorY = 'middle';
 
       text.position.set(pt.x + side.offsetX, pt.y, pt.z);
-
-      // 반구 내면에 텍스트를 붙이는 방향 계산
       orientTextOnBowl(text, pt);
 
       text.depthOffset = -0.1;
@@ -103,13 +127,14 @@ function createSeasonLabels(parent) {
   }
 }
 
-// ----- 시각선 라벨 (현대 시간 + 한글, 지평환 근처) -----
-function createHourLabels(parent) {
+// ----- 시각선 라벨 -----
+// mode='modern' → "12시" + 부제 "午(오)"
+// mode='classic' → "午" + 부제 "정오(12시)"
+function createHourLabels(parent, mode) {
   for (const hour of HOUR_LINES) {
     const hRad = hour.hourAngle * DEG2RAD;
     const latRad = LATITUDE * DEG2RAD;
 
-    // 춘분 적위=0에서 위치 계산
     const sinAlt = Math.cos(latRad) * Math.cos(hRad);
     if (sinAlt <= 0) continue;
 
@@ -120,68 +145,81 @@ function createHourLabels(parent) {
     let az = Math.acos(cosAz);
     if (hour.hourAngle > 0) az = -az;
 
-    // 지평환 안쪽 위치
     const r = BOWL_RADIUS - 0.04;
     const x = -Math.sin(az) * r;
     const zPos = -Math.cos(az) * r;
-
-    // azimuth 기반 수평 회전 (지평환 근처이므로 수평 배치가 자연스러움)
-    // az: 0=남, +=서(시계방향) - SunCalc 규약
-    // 지평환 위의 방위각: atan2(x, -zPos) -> 텍스트가 중심을 향하도록
     const azAngle = Math.atan2(x, -zPos);
 
-    if (hour.type === 'major') {
-      // 주요 시진: 큰 글씨로 현대시간 + 한글
-      const text = new Text();
-      text.text = `${hour.hour}시`;
-      text.fontSize = 0.025;
-      text.color = '#FFF8E7';
-      text.font = FONT_URL;
-      text.anchorX = 'center';
-      text.anchorY = 'middle';
-      text.position.set(x, -0.02, zPos);
-      text.rotation.x = -Math.PI / 2;
-      text.rotation.z = -azAngle + Math.PI;
-      text.depthOffset = -0.1;
-      text.renderOrder = 10;
-      text.sync();
-      parent.add(text);
+    if (mode === 'classic') {
+      // === 원본 모드: 한자 큰 글씨 ===
+      const mainText = new Text();
+      mainText.text = hour.label;
+      mainText.fontSize = hour.type === 'major' ? 0.028 : 0.018;
+      mainText.color = '#FFF8E7';
+      mainText.font = FONT_URL;
+      mainText.anchorX = 'center';
+      mainText.anchorY = 'middle';
+      mainText.position.set(x, -0.02, zPos);
+      mainText.rotation.x = -Math.PI / 2;
+      mainText.rotation.z = -azAngle + Math.PI;
+      mainText.depthOffset = -0.1;
+      mainText.renderOrder = 10;
+      mainText.sync();
+      parent.add(mainText);
 
-      // 한자 + 한글 (더 안쪽 작게)
-      const subText = new Text();
-      subText.text = `${hour.label}(${hour.name})`;
-      subText.fontSize = 0.014;
-      subText.color = '#FFD700';
-      subText.font = FONT_URL;
-      subText.anchorX = 'center';
-      subText.anchorY = 'middle';
-      // 더 안쪽(중심 방향)으로 배치
-      const rInner = r - 0.06;
-      const xInner = -Math.sin(az) * rInner;
-      const zInner = -Math.cos(az) * rInner;
-      subText.position.set(xInner, -0.02, zInner);
-      subText.rotation.x = -Math.PI / 2;
-      subText.rotation.z = -azAngle + Math.PI;
-      subText.depthOffset = -0.1;
-      subText.renderOrder = 10;
-      subText.sync();
-      parent.add(subText);
+      // 한글 + 현대시간 (부제, 안쪽 작게)
+      if (hour.type === 'major') {
+        const subText = new Text();
+        subText.text = `${hour.name}(${hour.hour}시)`;
+        subText.fontSize = 0.013;
+        subText.color = '#B0A590';
+        subText.font = FONT_URL;
+        subText.anchorX = 'center';
+        subText.anchorY = 'middle';
+        const rInner = r - 0.06;
+        subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
+        subText.rotation.x = -Math.PI / 2;
+        subText.rotation.z = -azAngle + Math.PI;
+        subText.depthOffset = -0.1;
+        subText.renderOrder = 10;
+        subText.sync();
+        parent.add(subText);
+      }
     } else {
-      // 보조(정): 작은 글씨
-      const text = new Text();
-      text.text = `${hour.hour}시`;
-      text.fontSize = 0.016;
-      text.color = '#E8D5B0';
-      text.font = FONT_URL;
-      text.anchorX = 'center';
-      text.anchorY = 'middle';
-      text.position.set(x, -0.02, zPos);
-      text.rotation.x = -Math.PI / 2;
-      text.rotation.z = -azAngle + Math.PI;
-      text.depthOffset = -0.1;
-      text.renderOrder = 10;
-      text.sync();
-      parent.add(text);
+      // === 현대 모드: 아라비아 숫자 큰 글씨 ===
+      const mainText = new Text();
+      mainText.text = `${hour.hour}시`;
+      mainText.fontSize = hour.type === 'major' ? 0.025 : 0.016;
+      mainText.color = hour.type === 'major' ? '#FFF8E7' : '#E8D5B0';
+      mainText.font = FONT_URL;
+      mainText.anchorX = 'center';
+      mainText.anchorY = 'middle';
+      mainText.position.set(x, -0.02, zPos);
+      mainText.rotation.x = -Math.PI / 2;
+      mainText.rotation.z = -azAngle + Math.PI;
+      mainText.depthOffset = -0.1;
+      mainText.renderOrder = 10;
+      mainText.sync();
+      parent.add(mainText);
+
+      // 한자 + 한글 (부제, 안쪽 작게) - major만
+      if (hour.type === 'major') {
+        const subText = new Text();
+        subText.text = `${hour.label}(${hour.name})`;
+        subText.fontSize = 0.014;
+        subText.color = '#FFD700';
+        subText.font = FONT_URL;
+        subText.anchorX = 'center';
+        subText.anchorY = 'middle';
+        const rInner = r - 0.06;
+        subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
+        subText.rotation.x = -Math.PI / 2;
+        subText.rotation.z = -azAngle + Math.PI;
+        subText.depthOffset = -0.1;
+        subText.renderOrder = 10;
+        subText.sync();
+        parent.add(subText);
+      }
     }
   }
 }

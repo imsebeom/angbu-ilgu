@@ -59,3 +59,4 @@
 - 2025-02-20: UI 읽는법 안내 패널 추가 (금색 가로선=절기, 검은 세로선=시각, 빨간 점=그림자)
 - 2025-02-20: 텍스트 라벨 방향 수정 - 시각선 라벨: azimuth 기반 rotation으로 변경, 절기선 라벨: orientTextOnBowl() 함수에서 correctedUp.y<0일 때 up/normal 반전하여 양쪽 모두 정방향 읽힘 보장
 - 2025-02-20: 그림자 엔진을 시간각 기반으로 수정 - SunCalc direction 대신 hourAngle+declination 천문학 공식 사용하여 격자선과 정확히 일치. sun-position.js에 calcHourAngleAndDec() 추가 (균시차+경도보정)
+- 2025-02-20: UI 개편 - 읽는법 패널을 느낌표(!) 버튼+모달로 대체 (어린이 친화적 설명). 현대/원본 모드 전환 버튼 추가 (현대=한글+아라비아숫자, 원본=한자)

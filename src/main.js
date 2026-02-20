@@ -3,7 +3,7 @@ import { buildAngbuIlgu } from './angbu-ilgu.js';
 import { createAllLines } from './sundial-lines.js';
 import { createShadowMarker, updateShadowMarker } from './shadow-engine.js';
 import { getSunPosition, updateSunLight } from './sun-position.js';
-import { createAllLabels } from './text-labels.js';
+import { createAllLabels, setLabelMode } from './text-labels.js';
 import { initUI } from './ui-controls.js';
 
 // ===== 상태 =====
@@ -40,6 +40,9 @@ scene.add(shadowMarker);
 const ui = initUI(state, {
   onDateTimeChange(date) {
     updateScene(date);
+  },
+  onLabelModeChange(mode) {
+    setLabelMode(labelsGroup, mode);
   }
 });
 

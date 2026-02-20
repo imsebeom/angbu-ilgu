@@ -66,6 +66,36 @@ export function initUI(state, callbacks) {
     }
   });
 
+  // 모드 전환 버튼
+  const modeBtn = document.getElementById('mode-btn');
+  let labelMode = 'modern';
+
+  if (modeBtn) {
+    modeBtn.addEventListener('click', () => {
+      labelMode = labelMode === 'modern' ? 'classic' : 'modern';
+      modeBtn.textContent = labelMode === 'modern' ? '현대' : '원본';
+      modeBtn.classList.toggle('classic', labelMode === 'classic');
+      if (callbacks.onLabelModeChange) callbacks.onLabelModeChange(labelMode);
+    });
+  }
+
+  // 도움말 모달
+  const helpBtn = document.getElementById('help-btn');
+  const helpModal = document.getElementById('help-modal');
+  const modalClose = document.getElementById('modal-close');
+
+  if (helpBtn && helpModal) {
+    helpBtn.addEventListener('click', () => {
+      helpModal.hidden = false;
+    });
+    modalClose.addEventListener('click', () => {
+      helpModal.hidden = true;
+    });
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) helpModal.hidden = true;
+    });
+  }
+
   return {
     updateDisplay(date, sunData) {
       // 시간 표시 업데이트
