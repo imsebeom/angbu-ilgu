@@ -76,8 +76,8 @@ export function initUI(state, callbacks) {
       const solarM = Math.round(((solarMinutes % 1440) + 1440) % 1440 % 60);
       timeDisplay.textContent = formatTime(solarMinutes);
       const jisin = getJisinTime(solarH, solarM);
-      jisinDisplay.textContent = jisin.hanja;
-      if (jisinKrDisplay) jisinKrDisplay.textContent = jisin.korean;
+      jisinDisplay.textContent = jisin.fullHanja;
+      if (jisinKrDisplay) jisinKrDisplay.textContent = jisin.fullKorean;
       if (timeSubDisplay) timeSubDisplay.textContent = `현대 시각 ${formatTime(kstMinutes)}`;
     } else {
       // 현대 모드: 메인=KST, 부가=진태양시
@@ -85,8 +85,8 @@ export function initUI(state, callbacks) {
       const h = Math.floor(kstMinutes / 60);
       const m = kstMinutes % 60;
       const jisin = getJisinTime(h, m);
-      jisinDisplay.textContent = jisin.hanja;
-      if (jisinKrDisplay) jisinKrDisplay.textContent = jisin.korean;
+      jisinDisplay.textContent = jisin.fullHanja;
+      if (jisinKrDisplay) jisinKrDisplay.textContent = jisin.fullKorean;
       if (timeSubDisplay) timeSubDisplay.textContent = `진태양시 ${formatTime(solarMinutes)}`;
     }
   }

@@ -116,27 +116,31 @@ export const ZODIAC_12 = [
 // ===== 12지신으로 시간 변환 =====
 // 전통 시법: 子=23~01, 丑=01~03, ..., 午=11~13, ..., 亥=21~23
 // 각 시의 전반(홀수시)=初, 후반(짝수시)=正
-// 예: 11:00=午初, 12:00=午正, 13:00=未初
+// 예: 11:00=午初, 12:00=午正, 12:30=午正 2각, 13:00=未初
 export function getJisinTime(hours, minutes) {
-  const totalMinutes = hours * 60 + minutes;
   const jisinNames = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
   const jisinKo = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해'];
 
   // 子시가 23시부터 시작이므로 1시간 앞당겨 계산
-  // 23:00~00:59 → 子, 01:00~02:59 → 丑, ...
-  let adjusted = (hours + 1) % 24; // 23→0, 0→1, 1→2, ..., 11→12, 12→13
+  let adjusted = (hours + 1) % 24;
   const index = Math.floor(adjusted / 2);
 
-  // 초/정 판별: 각 시의 전반 1시간=初, 후반 1시간=正
-  // 홀수 adjusted = 初 (예: 23시→adj=0 짝수→正? 아니 23시는 자초)
-  // 실제로: 각 지신시의 시작시각의 분을 기준으로 판별
-  // 子: 23:00~23:59=初, 00:00~00:59=正
-  // 午: 11:00~11:59=初, 12:00~12:59=正
+  // 초/정 판별: 전반 1시간=初, 후반 1시간=正
   const isJeong = (adjusted % 2) === 1;
 
+  // 각(刻) 계산: 1각=15분, 0~14분=정각, 15~29분=1각, 30~44분=2각, 45~59분=3각
+  const gak = Math.floor(minutes / 15);
+  const gakHanjaNum = ['', '一', '二', '三'];
+
+  const choJeongHanja = isJeong ? '正' : '初';
+  const choJeongKo = isJeong ? '정' : '초';
+
   return {
-    hanja: jisinNames[index] + (isJeong ? '正' : '初'),
-    korean: jisinKo[index] + (isJeong ? '정' : '초'),
+    hanja: jisinNames[index] + choJeongHanja,
+    korean: jisinKo[index] + choJeongKo,
+    gak,  // 0~3
+    fullHanja: jisinNames[index] + choJeongHanja + (gak > 0 ? ` ${gakHanjaNum[gak]}刻` : ' 正刻'),
+    fullKorean: jisinKo[index] + choJeongKo + (gak > 0 ? ` ${gak}각` : ' 정각'),
   };
 }
 
