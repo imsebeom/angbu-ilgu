@@ -295,14 +295,28 @@ export function initUI(state, callbacks) {
   const modeBtn = document.getElementById('mode-btn');
 
   // 초기 버튼 상태 반영
+  const modeLabel = document.getElementById('mode-label');
+  const modeHint = document.getElementById('mode-hint');
+
+  function updateModeBtnUI() {
+    if (!modeBtn) return;
+    if (labelMode === 'classic') {
+      if (modeLabel) modeLabel.textContent = '진태양시';
+      if (modeHint) modeHint.textContent = '클릭하여 현대 시각으로 바꾸기';
+      modeBtn.classList.add('classic');
+    } else {
+      if (modeLabel) modeLabel.textContent = '현대 시각';
+      if (modeHint) modeHint.textContent = '클릭하여 진태양시로 바꾸기';
+      modeBtn.classList.remove('classic');
+    }
+  }
+
   if (modeBtn) {
-    modeBtn.textContent = labelMode === 'modern' ? '현대 시각' : '진태양시';
-    modeBtn.classList.toggle('classic', labelMode === 'classic');
+    updateModeBtnUI();
 
     modeBtn.addEventListener('click', () => {
       labelMode = labelMode === 'modern' ? 'classic' : 'modern';
-      modeBtn.textContent = labelMode === 'modern' ? '현대 시각' : '진태양시';
-      modeBtn.classList.toggle('classic', labelMode === 'classic');
+      updateModeBtnUI();
       // 모드 전환 시 슬라이더와 표시 동기화
       syncSliderToDate(state.currentDate);
       updateAllTimeDisplay(state.currentDate);

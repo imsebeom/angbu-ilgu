@@ -62,8 +62,10 @@
         </div>
         <div class="date-term">
           <button class="spin-btn spin-up term-spin" id="term-up">&#9650;</button>
-          <span id="date-term-hanja" class="date-term-hanja">春分</span>
-          <span id="date-term-name" class="date-term-name">춘분</span>
+          <span class="date-term-text">
+            <span id="date-term-hanja" class="date-term-hanja">春分</span>
+            <span id="date-term-name" class="date-term-name">춘분</span>
+          </span>
           <button class="spin-btn spin-down term-spin" id="term-down">&#9660;</button>
         </div>
       </div>
@@ -80,6 +82,10 @@
         </span>
       </div>
       <span id="time-sub-display" class="time-sub"></span>
+      <button id="mode-btn" class="mode-toggle-btn" aria-label="격자 모드 전환">
+        <span id="mode-label">진태양시</span>
+        <span id="mode-hint" class="mode-hint">클릭하여 현대 시각으로 바꾸기</span>
+      </button>
     </div>
 
     <div class="control-group">
@@ -122,7 +128,6 @@
 
   <!-- 우측 하단: 모드 전환 + 도움말 버튼 -->
   <div id="bottom-right-btns">
-    <button id="mode-btn" aria-label="격자 모드 전환">현대 시각</button>
     <button id="jisin-btn" aria-label="12지신 시간 알아보기">12지신 시간?</button>
     <button id="terms-btn" aria-label="24절기 알아보기">24절기란?</button>
     <button id="help-btn" aria-label="앙부일구 알아보기">앙부일구란?</button>

@@ -118,17 +118,22 @@ body {
   line-height: 1;
 }
 
+.date-term-text {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
+}
+
 .date-term-hanja {
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   color: #CD7F32;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .date-term-name {
   font-size: 0.68rem;
   color: #8a7e6b;
-  white-space: nowrap;
 }
 
 .spinner-col {
@@ -384,31 +389,39 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* === 모드 전환 버튼 === */
-#mode-btn {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 18px;
-  background: rgba(205, 127, 50, 0.15);
-  border: 1.5px solid rgba(205, 127, 50, 0.4);
+.mode-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(205, 127, 50, 0.1);
+  border: 1px solid rgba(205, 127, 50, 0.3);
   color: #CD7F32;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s;
-  backdrop-filter: blur(8px);
   white-space: nowrap;
-  letter-spacing: 0.03em;
 }
 
-#mode-btn:hover {
-  background: rgba(205, 127, 50, 0.3);
+.mode-toggle-btn:hover {
+  background: rgba(205, 127, 50, 0.25);
   border-color: #CD7F32;
 }
 
-#mode-btn.classic {
-  background: rgba(205, 127, 50, 0.35);
+.mode-toggle-btn.classic {
+  background: rgba(205, 127, 50, 0.25);
   border-color: #CD7F32;
   color: #e8d5a0;
+}
+
+.mode-hint {
+  font-size: 0.55rem;
+  font-weight: 400;
+  opacity: 0.65;
+  color: #c0a870;
 }
 
 /* === 24절기 버튼 === */
