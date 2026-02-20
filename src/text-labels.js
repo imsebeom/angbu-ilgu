@@ -170,7 +170,7 @@ function createHourLabels(parent, mode) {
       mainText.anchorY = 'middle';
       mainText.position.set(x, -0.02, zPos);
       mainText.rotation.x = -Math.PI / 2;
-      mainText.rotation.z = -azAngle + Math.PI;
+      mainText.rotation.z = -azAngle;
       mainText.depthOffset = -0.1;
       mainText.renderOrder = 10;
       mainText.sync();
@@ -188,7 +188,7 @@ function createHourLabels(parent, mode) {
         const rInner = r - 0.07;
         subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
         subText.rotation.x = -Math.PI / 2;
-        subText.rotation.z = -azAngle + Math.PI;
+        subText.rotation.z = -azAngle;
         subText.depthOffset = -0.1;
         subText.renderOrder = 10;
         subText.sync();
@@ -208,7 +208,7 @@ function createHourLabels(parent, mode) {
       mainText.anchorY = 'middle';
       mainText.position.set(x, -0.02, zPos);
       mainText.rotation.x = -Math.PI / 2;
-      mainText.rotation.z = -azAngle + Math.PI;
+      mainText.rotation.z = -azAngle;
       mainText.depthOffset = -0.1;
       mainText.renderOrder = 10;
       mainText.sync();
@@ -227,7 +227,7 @@ function createHourLabels(parent, mode) {
         const rInner = r - 0.07;
         subText.position.set(-Math.sin(az) * rInner, -0.02, -Math.cos(az) * rInner);
         subText.rotation.x = -Math.PI / 2;
-        subText.rotation.z = -azAngle + Math.PI;
+        subText.rotation.z = -azAngle;
         subText.depthOffset = -0.1;
         subText.renderOrder = 10;
         subText.sync();
@@ -263,7 +263,7 @@ export function updateModernHourLabels(labelsGroup, date) {
     if (pos) {
       textObj.position.set(pos.x, -0.02, pos.z);
       textObj.rotation.x = -Math.PI / 2;
-      textObj.rotation.z = -pos.azAngle + Math.PI;
+      textObj.rotation.z = -pos.azAngle;
       textObj.visible = true;
     } else {
       textObj.visible = false;
@@ -279,7 +279,7 @@ export function updateModernHourLabels(labelsGroup, date) {
         const zInner = -Math.cos(pos.az) * rInner;
         subObj.position.set(xInner, -0.02, zInner);
         subObj.rotation.x = -Math.PI / 2;
-        subObj.rotation.z = -pos.azAngle + Math.PI;
+        subObj.rotation.z = -pos.azAngle;
         subObj.visible = true;
       } else {
         subObj.visible = false;
@@ -341,7 +341,7 @@ function createNoonLineLabels(parent, mode) {
 
     const text = new Text();
     text.text = mode === 'classic' ? season.label : season.name;
-    text.fontSize = 0.013;
+    text.fontSize = 0.018;
     text.color = mode === 'classic' ? '#E8D5B0' : '#D4AA60';
     text.font = FONT_URL;
     text.anchorX = 'left';
@@ -373,7 +373,7 @@ function createEquinoxLineLabels(parent, mode) {
     } else {
       text.text = `${hour.hour}시`;
     }
-    text.fontSize = 0.013;
+    text.fontSize = 0.018;
     text.color = mode === 'classic' ? '#E8D5B0' : '#D4AA60';
     text.font = FONT_URL;
     text.anchorX = 'center';
