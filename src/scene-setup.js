@@ -47,7 +47,7 @@ export function initScene(container) {
   // === Camera ===
   const aspect = window.innerWidth / window.innerHeight;
   const camera = new THREE.PerspectiveCamera(45, aspect, 0.01, 100);
-  camera.position.set(-0.57, 1.8, -2.12);
+  camera.position.set(0.93, 1.8, -1.99);
   camera.lookAt(0, -0.15, 0);
 
   // === OrbitControls ===
