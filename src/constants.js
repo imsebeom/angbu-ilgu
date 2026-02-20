@@ -16,60 +16,64 @@ export const GNOMON_BASE_WIDTH = 0.04;
 export const GNOMON_TIP_OFFSET = 0.0; // 영침 끝 = 구 중심
 
 // ===== 13개 절기선 적위(°) - 동지→하지 =====
-// 대칭 쌍: 동지/하지, 소한/대설, 대한/소설, 입춘/입동, 우수/상강, 경칩/한로, 춘분/추분 ...
+// Spencer 공식 기반 실측 평균값 (SEASON_LINES와 동일)
 export const DECLINATION_LINES = [
   -23.44,   // 동지
-  -20.15,   // 소한/대설
-  -11.47,   // 대한/소설
-  -5.91,    // 입춘/입동 (근사)
-  -11.47,   // 우수/상강 (근사) - 실제로는 다른 값
-].concat([0]).concat([  // 춘분/추분
-  5.91,
-  11.47,
-  16.33,
-  20.15,
-  23.44     // 하지
-]);
+  -22.56,   // 소한/대설
+  -20.14,   // 대한/소설
+  -16.27,   // 입춘/입동
+  -11.35,   // 우수/상강
+  -5.77,    // 경칩/한로
+  0,        // 춘분/추분
+  5.89,     // 청명/백로
+  11.48,    // 곡우/처서
+  16.48,    // 입하/입추
+  20.14,    // 소만/대서
+  23.44,    // 하지
+];
 
 // 정확한 13개 절기선 (동지에서 하지까지 대칭)
+// 적위값은 Spencer 공식 기반 실측 평균 (절기 대칭 쌍의 평균값 사용)
 export const SEASON_LINES = [
   { declination: -23.44, label: '冬至', name: '동지' },
-  { declination: -20.15, label: '小寒/大雪', name: '소한·대설' },
-  { declination: -11.47, label: '大寒/小雪', name: '대한·소설' },
-  { declination: -5.91,  label: '立春/立冬', name: '입춘·입동' },
-  { declination:  0.0,   label: '春分/秋分', name: '춘분·추분' },
-  { declination:  5.91,  label: '淸明/寒露', name: '청명·한로' },
-  { declination:  11.47, label: '穀雨/霜降', name: '곡우·상강' },
-  { declination:  16.33, label: '立夏/立秋', name: '입하·입추' },
-  { declination:  20.15, label: '小滿/處暑', name: '소만·처서' },
+  { declination: -22.56, label: '小寒/大雪', name: '소한·대설' },     // (22.53+22.58)/2
+  { declination: -20.14, label: '大寒/小雪', name: '대한·소설' },     // (20.19+20.09)/2
+  { declination: -16.27, label: '立春/立冬', name: '입춘·입동' },     // (16.32+16.21)/2
+  { declination: -11.35, label: '雨水/霜降', name: '우수·상강' },     // (11.38+11.31)/2
+  { declination:  -5.77, label: '驚蟄/寒露', name: '경칩·한로' },     // (5.77+5.76)/2
+  { declination:   0.0,  label: '春分/秋分', name: '춘분·추분' },
+  { declination:   5.89, label: '淸明/白露', name: '청명·백로' },     // (5.97+5.81)/2
+  { declination:  11.48, label: '穀雨/處暑', name: '곡우·처서' },     // (11.41+11.54)/2
+  { declination:  16.48, label: '立夏/立秋', name: '입하·입추' },     // (16.45+16.51)/2
+  { declination:  20.14, label: '小滿/大暑', name: '소만·대서' },     // (20.12+20.15)/2
   { declination:  23.44, label: '夏至', name: '하지' },
 ];
 
-// ===== 24절기 상세 데이터 (적위 + 연중 대략 날짜) =====
+// ===== 24절기 상세 데이터 (적위: Spencer 공식 기반 + 연중 대략 날짜) =====
 export const SOLAR_TERMS_24 = [
-  { name: '소한', hanja: '小寒', month: 1, day: 6, declination: -22.8 },
-  { name: '대한', hanja: '大寒', month: 1, day: 20, declination: -20.1 },
-  { name: '입춘', hanja: '立春', month: 2, day: 4, declination: -16.3 },
-  { name: '우수', hanja: '雨水', month: 2, day: 19, declination: -11.5 },
-  { name: '경칩', hanja: '驚蟄', month: 3, day: 6, declination: -5.9 },
-  { name: '춘분', hanja: '春分', month: 3, day: 21, declination: 0.0 },
-  { name: '청명', hanja: '淸明', month: 4, day: 5, declination: 5.9 },
-  { name: '곡우', hanja: '穀雨', month: 4, day: 20, declination: 11.5 },
-  { name: '입하', hanja: '立夏', month: 5, day: 6, declination: 16.3 },
-  { name: '소만', hanja: '小滿', month: 5, day: 21, declination: 20.1 },
-  { name: '망종', hanja: '芒種', month: 6, day: 6, declination: 23.0 },
+  { name: '소한', hanja: '小寒', month: 1, day: 6, declination: -22.53 },
+  { name: '대한', hanja: '大寒', month: 1, day: 20, declination: -20.19 },
+  { name: '입춘', hanja: '立春', month: 2, day: 4, declination: -16.32 },
+  { name: '우수', hanja: '雨水', month: 2, day: 19, declination: -11.38 },
+  { name: '경칩', hanja: '驚蟄', month: 3, day: 6, declination: -5.77 },
+  { name: '춘분', hanja: '春分', month: 3, day: 21, declination: 0.13 },
+  { name: '청명', hanja: '淸明', month: 4, day: 5, declination: 5.97 },
+  { name: '곡우', hanja: '穀雨', month: 4, day: 20, declination: 11.41 },
+  { name: '입하', hanja: '立夏', month: 5, day: 6, declination: 16.45 },
+  { name: '소만', hanja: '小滿', month: 5, day: 21, declination: 20.12 },
+  { name: '망종', hanja: '芒種', month: 6, day: 6, declination: 22.63 },
   { name: '하지', hanja: '夏至', month: 6, day: 21, declination: 23.44 },
-  { name: '소서', hanja: '小暑', month: 7, day: 7, declination: 23.0 },
-  { name: '대서', hanja: '大暑', month: 7, day: 23, declination: 20.1 },
-  { name: '입추', hanja: '立秋', month: 8, day: 7, declination: 16.3 },
-  { name: '처서', hanja: '處暑', month: 8, day: 23, declination: 11.5 },
-  { name: '백로', hanja: '白露', month: 9, day: 8, declination: 5.9 },
-  { name: '추분', hanja: '秋分', month: 9, day: 23, declination: 0.0 },
-  { name: '한로', hanja: '寒露', month: 10, day: 8, declination: -5.9 },
-  { name: '상강', hanja: '霜降', month: 10, day: 23, declination: -11.5 },
-  { name: '입동', hanja: '立冬', month: 11, day: 7, declination: -16.3 },
-  { name: '소설', hanja: '小雪', month: 11, day: 22, declination: -20.1 },
-  { name: '대설', hanja: '大雪', month: 12, day: 7, declination: -23.0 },
+  { name: '소서', hanja: '小暑', month: 7, day: 7, declination: 22.63 },
+  { name: '대서', hanja: '大暑', month: 7, day: 23, declination: 20.15 },
+  { name: '입추', hanja: '立秋', month: 8, day: 7, declination: 16.51 },
+  { name: '처서', hanja: '處暑', month: 8, day: 23, declination: 11.54 },
+  { name: '백로', hanja: '白露', month: 9, day: 8, declination: 5.81 },
+  { name: '추분', hanja: '秋分', month: 9, day: 23, declination: 0.05 },
+  { name: '한로', hanja: '寒露', month: 10, day: 8, declination: -5.76 },
+  { name: '상강', hanja: '霜降', month: 10, day: 23, declination: -11.31 },
+  { name: '입동', hanja: '立冬', month: 11, day: 7, declination: -16.21 },
+  { name: '소설', hanja: '小雪', month: 11, day: 22, declination: -20.09 },
+  { name: '대설', hanja: '大雪', month: 12, day: 7, declination: -22.58 },
   { name: '동지', hanja: '冬至', month: 12, day: 22, declination: -23.44 },
 ];
 

@@ -7,8 +7,9 @@ import { createAllLabels, setLabelMode, updateModernHourLabels } from './text-la
 import { initUI } from './ui-controls.js';
 
 // ===== 상태 =====
-// 기본: 오늘 정오, 정지 모드 (실시간은 수동 활성화)
+// 기본: 하지(6/21) 정오, 정지 모드 (실시간은 수동 활성화)
 const defaultDate = new Date();
+defaultDate.setMonth(5, 21); // 6월 21일 (하지)
 defaultDate.setHours(12, 0, 0, 0);
 const state = {
   currentDate: defaultDate,
