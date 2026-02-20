@@ -30,6 +30,10 @@ export function getSunPosition(date) {
     -Math.cos(az) * Math.cos(alt),  // z: 남=-z (SunCalc 남=0일때 cos=1)
   ).normalize();
 
+  // 시간각(Hour Angle) 계산 - 시각선/절기선과 동일한 좌표를 위해
+  // 표준시 → 진태양시 변환 포함
+  const { hourAngleDeg, declinationDeg } = calcHourAngleAndDec(date);
+
   return {
     direction,
     altitude: alt,
@@ -37,6 +41,50 @@ export function getSunPosition(date) {
     altitudeDeg: alt * RAD2DEG,
     azimuthDeg: az * RAD2DEG,
     isAboveHorizon: alt > 0,
+    hourAngleDeg,
+    declinationDeg,
+  };
+}
+
+/**
+ * 표준시(KST)에서 시간각(Hour Angle)과 태양 적위를 계산
+ * 균시차(Equation of Time) + 경도 보정 포함
+ */
+function calcHourAngleAndDec(date) {
+  // 연중 일수
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const dayOfYear = diff / 86400000; // 소수점 포함
+
+  // 태양 적위 (Spencer 공식)
+  const gamma = 2 * Math.PI * (dayOfYear - 1) / 365;
+  const decRad = 0.006918
+    - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma)
+    - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma)
+    - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
+
+  // 균시차 (분 단위, Spencer 공식)
+  const eqTime = 229.18 * (0.000075
+    + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
+    - 0.014615 * Math.cos(2 * gamma) - 0.04089 * Math.sin(2 * gamma));
+
+  // 표준시 → 진태양시
+  // 한국 표준시(KST)는 135°E 기준
+  const standardMeridian = 135; // KST 기준 경도
+  const longitudeCorrection = 4 * (LONGITUDE - standardMeridian); // 분 단위
+
+  // 현재 시간 (시:분을 소수시간으로)
+  const hours = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+
+  // 진태양시 (시간)
+  const solarTime = hours + (longitudeCorrection + eqTime) / 60;
+
+  // 시간각 (도): 정오=0, 오후=+, 오전=-
+  const hourAngleDeg = (solarTime - 12) * 15;
+
+  return {
+    hourAngleDeg,
+    declinationDeg: decRad * RAD2DEG,
   };
 }
 

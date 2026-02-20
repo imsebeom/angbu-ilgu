@@ -18,7 +18,7 @@
 - `src/main.js` - 앱 진입점, 애니메이션 루프, 그림자 마커 관리
 - `src/angbu-ilgu.js` - 3D 모델 (반구, 지평환, 영침, 용주, 십자수부, 받침판)
 - `src/scene-setup.js` - Three.js 씬/카메라/조명/배경 초기화
-- `src/sun-position.js` - SunCalc 기반 태양 위치 계산
+- `src/sun-position.js` - SunCalc 기반 태양 위치 계산 + 시간각/적위 계산 (균시차+경도보정)
 - `src/sundial-lines.js` - 절기선/시각선 생성
 - `src/shadow-engine.js` - 그림자 점 계산/마커
 - `src/text-labels.js` - 한자+한글 텍스트 라벨 (troika-three-text, Noto Sans KR Bold OTF)
@@ -35,6 +35,7 @@
 - 배경: 태양 고도에 따라 동적 그라디언트 (낮=파란하늘, 해질녘=오렌지, 밤=남색)
 - 12지신 시간: getJisinTime() - 23시=子초, 11시=午초, 12시=午정
 - 텍스트 방향: 지평환(12지신)과 시각선 라벨은 `rotation.x=-π/2, rotation.z=-azAngle+π` 패턴. 절기선 라벨은 `orientTextOnBowl()` 사용 - cross(worldUp, inwardNormal)로 tangent 계산 후 correctedUp.y<0이면 up/normal 반전
+- 그림자 엔진: SunCalc direction 대신 시간각(hourAngle)+적위(declination) 기반 천문학 공식 사용. 균시차(Spencer)+경도보정 포함하여 격자선과 동일한 좌표계 사용. KST 12:00≠진태양시 정오 (서울 2월: 진태양시 정오 ≈ KST 12:46)
 
 ## 작업 이력
 - 2025-02-19: 프로젝트 초기화 (package.json, vite, index.html, CSS)
@@ -57,3 +58,4 @@
 - 2025-02-20: 폰트 URL 수정 - Noto Sans KR Bold OTF (기존 TTF URL 404 에러)
 - 2025-02-20: UI 읽는법 안내 패널 추가 (금색 가로선=절기, 검은 세로선=시각, 빨간 점=그림자)
 - 2025-02-20: 텍스트 라벨 방향 수정 - 시각선 라벨: azimuth 기반 rotation으로 변경, 절기선 라벨: orientTextOnBowl() 함수에서 correctedUp.y<0일 때 up/normal 반전하여 양쪽 모두 정방향 읽힘 보장
+- 2025-02-20: 그림자 엔진을 시간각 기반으로 수정 - SunCalc direction 대신 hourAngle+declination 천문학 공식 사용하여 격자선과 정확히 일치. sun-position.js에 calcHourAngleAndDec() 추가 (균시차+경도보정)

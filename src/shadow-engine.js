@@ -1,23 +1,56 @@
 import * as THREE from 'three';
-import { BOWL_RADIUS, BOWL_THICKNESS } from './constants.js';
+import { BOWL_RADIUS, BOWL_THICKNESS, LATITUDE, DEG2RAD } from './constants.js';
 
 /**
  * 영침 끝(구 중심 = 원점)에서 태양 반대 방향으로 반구 내면에 맺히는
  * 그림자 점의 위치를 계산한다.
  *
- * 원리: 영침 끝이 정확히 구의 중심(원점)에 있으므로,
- * 태양 방향 단위벡터 s에 대해 그림자 점 P = -R × s
- * (태양의 반대편으로 반지름만큼)
+ * 시각선과 동일한 천문학 공식(시간각 + 적위)을 사용하여
+ * 그림자 점이 격자선 위에 정확히 맺히도록 한다.
+ *
+ * sunData에서 hourAngleDeg와 declinationDeg를 받아
+ * sundial-lines.js의 calcShadowProjection과 동일한 로직 적용.
  */
 export function calculateShadowPoint(sunData) {
   if (!sunData.isAboveHorizon) return null;
 
-  const R = BOWL_RADIUS - BOWL_THICKNESS - 0.002; // 내면에 딱 붙도록
-  const shadowPoint = sunData.direction.clone().negate().multiplyScalar(R);
+  const R = BOWL_RADIUS - BOWL_THICKNESS - 0.002;
+  const latRad = LATITUDE * DEG2RAD;
+  const decRad = sunData.declinationDeg * DEG2RAD;
+  const hRad = sunData.hourAngleDeg * DEG2RAD;
 
-  // 반구 내부 (y < 0) 인지 확인
+  // 태양 고도각
+  const sinAlt = Math.sin(latRad) * Math.sin(decRad)
+               + Math.cos(latRad) * Math.cos(decRad) * Math.cos(hRad);
+  if (sinAlt <= 0.01) return null;
+
+  const alt = Math.asin(sinAlt);
+  const cosAlt = Math.cos(alt);
+  if (cosAlt < 0.001) return null;
+
+  // 태양 방위각 (북=0 기준)
+  let cosAzNorth = (Math.sin(decRad) - Math.sin(latRad) * sinAlt)
+            / (Math.cos(latRad) * cosAlt);
+  cosAzNorth = Math.max(-1, Math.min(1, cosAzNorth));
+  let azNorth = Math.acos(cosAzNorth);
+
+  const sinH = Math.sin(hRad);
+  if (sinH > 0) azNorth = 2 * Math.PI - azNorth;
+
+  // 남=0 기준으로 변환
+  const az = azNorth - Math.PI;
+
+  // 태양 방향 → Three.js 좌표계
+  const sunDir = new THREE.Vector3(
+    -Math.sin(az) * cosAlt,
+     sinAlt,
+    -Math.cos(az) * cosAlt,
+  ).normalize();
+
+  // 그림자 점 = 태양 반대 방향 × R
+  const shadowPoint = sunDir.clone().negate().multiplyScalar(R);
+
   if (shadowPoint.y >= 0) return null;
-
   return shadowPoint;
 }
 
