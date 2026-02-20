@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>앙부일구 仰釜日晷 - 3D 시뮬레이션</title>
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+  <!-- 3D 캔버스 컨테이너 -->
+  <div id="app"></div>
+
+  <!-- 좌측: 제어 패널 -->
+  <aside id="control-panel" class="panel left">
+    <h2 class="panel-title">仰釜日晷</h2>
+    <p class="panel-subtitle">앙부일구 시뮬레이션</p>
+
+    <div class="control-group">
+      <label for="date-input">날짜</label>
+      <input type="date" id="date-input">
+    </div>
+
+    <div class="control-group">
+      <label for="time-slider">시각</label>
+      <input type="range" id="time-slider" min="0" max="1440" value="720" step="1">
+      <div class="time-display-row">
+        <span id="time-display" class="time-value">12:00</span>
+        <span id="jisin-display" class="hanja-value">午正</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>배속</label>
+      <div class="speed-controls">
+        <button class="speed-btn active" data-speed="0">정지</button>
+        <button class="speed-btn" data-speed="1">1x</button>
+        <button class="speed-btn" data-speed="60">1분/초</button>
+        <button class="speed-btn" data-speed="3600">1시간/초</button>
+      </div>
+    </div>
+
+    <button id="realtime-btn" class="primary-btn">실시간 모드</button>
+  </aside>
+
+  <!-- 우측: 정보 패널 -->
+  <aside id="info-panel" class="panel right">
+    <div class="info-item">
+      <span class="info-label">절기</span>
+      <span id="season-display" class="info-value hanja-value">春分</span>
+      <span id="season-name-display" class="info-sub">춘분</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">태양 고도</span>
+      <span id="altitude-display" class="info-value">--°</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">태양 방위</span>
+      <span id="azimuth-display" class="info-value">--°</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">관측지</span>
+      <span class="info-value">서울 (37.5°N)</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">상태</span>
+      <span id="sun-status" class="info-value">--</span>
+    </div>
+    <hr class="info-divider">
+    <div class="info-guide">
+      <span class="info-guide-title">읽는 법</span>
+      <p><span class="guide-color season-color"></span> <b>금색 가로선</b> = 절기(계절)</p>
+      <p><span class="guide-color hour-color"></span> <b>검은 세로선</b> = 시각(시간)</p>
+      <p><span class="guide-color marker-color"></span> <b>빨간 점</b> = 지금 그림자</p>
+    </div>
+  </aside>
+
+  <!-- 하단: 도움말 -->
+  <div id="help-bar">
+    <span>마우스 드래그: 회전 | 휠: 줌 | 우클릭 드래그: 이동</span>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
