@@ -46,17 +46,23 @@
 
     <div class="control-group">
       <label>날짜</label>
-      <div class="date-spinner">
-        <div class="spinner-col">
-          <button class="spin-btn spin-up" data-target="month" data-dir="1">&#9650;</button>
-          <span id="date-month" class="spin-value">06</span>
-          <button class="spin-btn spin-down" data-target="month" data-dir="-1">&#9660;</button>
+      <div class="date-row">
+        <div class="date-spinner compact">
+          <div class="spinner-col">
+            <button class="spin-btn spin-up" data-target="month" data-dir="1">&#9650;</button>
+            <span id="date-month" class="spin-value">06</span>
+            <button class="spin-btn spin-down" data-target="month" data-dir="-1">&#9660;</button>
+          </div>
+          <span class="spin-sep">-</span>
+          <div class="spinner-col">
+            <button class="spin-btn spin-up" data-target="day" data-dir="1">&#9650;</button>
+            <span id="date-day" class="spin-value">21</span>
+            <button class="spin-btn spin-down" data-target="day" data-dir="-1">&#9660;</button>
+          </div>
         </div>
-        <span class="spin-sep">-</span>
-        <div class="spinner-col">
-          <button class="spin-btn spin-up" data-target="day" data-dir="1">&#9650;</button>
-          <span id="date-day" class="spin-value">21</span>
-          <button class="spin-btn spin-down" data-target="day" data-dir="-1">&#9660;</button>
+        <div class="date-term">
+          <span id="date-term-hanja" class="date-term-hanja">春分</span>
+          <span id="date-term-name" class="date-term-name">춘분</span>
         </div>
       </div>
     </div>

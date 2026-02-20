@@ -335,6 +335,12 @@ function updateInfoPanel(date, sunData) {
   if (seasonDisplay) seasonDisplay.textContent = term.hanja;
   if (seasonNameDisplay) seasonNameDisplay.textContent = term.name;
 
+  // 날짜 옆 절기 표시
+  const dateTermHanja = document.getElementById('date-term-hanja');
+  const dateTermName = document.getElementById('date-term-name');
+  if (dateTermHanja) dateTermHanja.textContent = term.hanja;
+  if (dateTermName) dateTermName.textContent = term.name;
+
   // 태양 고도
   const altDisplay = document.getElementById('altitude-display');
   if (altDisplay) {

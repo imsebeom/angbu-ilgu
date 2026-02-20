@@ -74,6 +74,12 @@ body {
   letter-spacing: 0.08em;
 }
 
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
 .date-spinner {
   display: flex;
   align-items: center;
@@ -83,6 +89,40 @@ body {
   border: 1px solid rgba(205, 127, 50, 0.3);
   border-radius: 6px;
   padding: 4px 8px;
+}
+
+.date-spinner.compact {
+  padding: 4px 6px;
+  flex-shrink: 0;
+  border-radius: 6px 0 0 6px;
+  border-right: none;
+}
+
+.date-term {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+  flex: 1;
+  background: rgba(205, 127, 50, 0.08);
+  border: 1px solid rgba(205, 127, 50, 0.3);
+  border-radius: 0 6px 6px 0;
+  padding: 4px 6px;
+  min-height: 100%;
+}
+
+.date-term-hanja {
+  font-size: 1.05rem;
+  color: #CD7F32;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.date-term-name {
+  font-size: 0.68rem;
+  color: #8a7e6b;
+  white-space: nowrap;
 }
 
 .spinner-col {
