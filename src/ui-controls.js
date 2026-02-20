@@ -161,29 +161,32 @@ export function initUI(state, callbacks) {
     callbacks.onDateTimeChange(state.currentDate);
   });
 
-  // 배속 버튼
+  // 배속 버튼 (실시간 버튼 제외)
   speedBtns.forEach(btn => {
+    if (btn === realtimeBtn) return; // 실시간 버튼은 별도 처리
     btn.addEventListener('click', () => {
       speedBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.speed = parseInt(btn.dataset.speed);
       state.dateOnly = btn.dataset.dateonly === 'true';
       state._dayAccum = 0;
-      if (state.speed > 0) {
-        state.isRealtime = false;
-        realtimeBtn.classList.remove('active');
-      }
+      state.isRealtime = false;
     });
   });
 
-  // 실시간 모드
+  // 실시간 모드 (speed-controls 내 버튼)
   realtimeBtn.addEventListener('click', () => {
     state.isRealtime = !state.isRealtime;
-    realtimeBtn.classList.toggle('active', state.isRealtime);
     if (state.isRealtime) {
-      state.speed = 1;
       speedBtns.forEach(b => b.classList.remove('active'));
-      speedBtns[1].classList.add('active'); // 1x
+      realtimeBtn.classList.add('active');
+      state.speed = 1;
+      state.dateOnly = false;
+    } else {
+      realtimeBtn.classList.remove('active');
+      // 정지 상태로 복귀
+      speedBtns[0].classList.add('active'); // 정지 버튼
+      state.speed = 0;
     }
   });
 

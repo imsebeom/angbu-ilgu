@@ -272,29 +272,23 @@ input[type="range"]::-moz-range-thumb {
   font-weight: 600;
 }
 
-/* === 주요 버튼 === */
-.primary-btn {
-  width: 100%;
-  padding: 10px;
-  background: rgba(205, 127, 50, 0.15);
-  border: 1px solid rgba(205, 127, 50, 0.4);
-  border-radius: 8px;
+/* === 실시간 버튼 (speed-controls 내) === */
+.speed-btn.realtime-btn {
+  background: rgba(205, 127, 50, 0.12);
+  border-color: rgba(205, 127, 50, 0.35);
   color: #CD7F32;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 8px;
 }
 
-.primary-btn:hover {
+.speed-btn.realtime-btn:hover {
   background: rgba(205, 127, 50, 0.25);
-  border-color: #CD7F32;
+  color: #e8d5a0;
 }
 
-.primary-btn.active {
+.speed-btn.realtime-btn.active {
   background: #CD7F32;
+  border-color: #CD7F32;
   color: #1a1a2e;
+  font-weight: 700;
 }
 
 /* === 정보 패널 === */
