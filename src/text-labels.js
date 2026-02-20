@@ -342,7 +342,7 @@ function createNoonLineLabels(parent, mode) {
     const text = new Text();
     text.text = mode === 'classic' ? season.label : season.name;
     text.fontSize = 0.018;
-    text.color = mode === 'classic' ? '#E8D5B0' : '#D4AA60';
+    text.color = '#1a1a1a';
     text.font = FONT_URL;
     text.anchorX = 'left';
     text.anchorY = 'middle';
@@ -374,7 +374,7 @@ function createEquinoxLineLabels(parent, mode) {
       text.text = `${hour.hour}시`;
     }
     text.fontSize = 0.018;
-    text.color = mode === 'classic' ? '#E8D5B0' : '#D4AA60';
+    text.color = '#1a1a1a';
     text.font = FONT_URL;
     text.anchorX = 'center';
     text.anchorY = 'top';
