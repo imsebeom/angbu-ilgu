@@ -29,6 +29,14 @@ export function createAllLabels() {
   createHourLabels(modernGroup, 'modern');
   createHourLabels(classicGroup, 'classic');
 
+  // 정오선(午) 위 절기 교차점 라벨
+  createNoonLineLabels(modernGroup, 'modern');
+  createNoonLineLabels(classicGroup, 'classic');
+
+  // 춘분선(적위=0°) 위 시각 교차점 라벨
+  createEquinoxLineLabels(modernGroup, 'modern');
+  createEquinoxLineLabels(classicGroup, 'classic');
+
   // 기본: 현대 모드 표시
   classicGroup.visible = false;
 
@@ -319,6 +327,66 @@ function _calcCorrectionMinutes(date) {
   const longitudeCorrection = 4 * (LONGITUDE - standardMeridian);
 
   return eqTime + longitudeCorrection;
+}
+
+// ----- 정오선(午, H=0°) 위 절기 교차점 라벨 -----
+// 정오선과 각 절기선이 만나는 교차점에 절기명 표시
+function createNoonLineLabels(parent, mode) {
+  // 약간 시간각을 오프셋하여 라벨이 교차점 옆(서쪽)에 표시되도록
+  const labelOffsetH = 3; // 3° 오프셋 (정오선 바로 옆)
+
+  for (const season of SEASON_LINES) {
+    const pt = calcLabelPosition(season.declination, labelOffsetH);
+    if (!pt) continue;
+
+    const text = new Text();
+    text.text = mode === 'classic' ? season.label : season.name;
+    text.fontSize = 0.013;
+    text.color = mode === 'classic' ? '#E8D5B0' : '#D4AA60';
+    text.font = FONT_URL;
+    text.anchorX = 'left';
+    text.anchorY = 'middle';
+
+    text.position.copy(pt);
+    orientTextOnBowl(text, pt);
+
+    text.depthOffset = -0.2;
+    text.renderOrder = 12;
+    text.sync();
+    parent.add(text);
+  }
+}
+
+// ----- 춘분선(적위=0°) 위 시각 교차점 라벨 -----
+// 춘분선과 각 시각선이 만나는 교차점에 시각명 표시
+function createEquinoxLineLabels(parent, mode) {
+  // 약간 적위를 오프셋하여 라벨이 교차점 아래(동지 방향)에 표시되도록
+  const labelOffsetDec = -2; // -2° 오프셋 (춘분선 바로 아래)
+
+  for (const hour of HOUR_LINES) {
+    const pt = calcLabelPosition(labelOffsetDec, hour.hourAngle);
+    if (!pt) continue;
+
+    const text = new Text();
+    if (mode === 'classic') {
+      text.text = hour.label;
+    } else {
+      text.text = `${hour.hour}시`;
+    }
+    text.fontSize = 0.013;
+    text.color = mode === 'classic' ? '#E8D5B0' : '#D4AA60';
+    text.font = FONT_URL;
+    text.anchorX = 'center';
+    text.anchorY = 'top';
+
+    text.position.copy(pt);
+    orientTextOnBowl(text, pt);
+
+    text.depthOffset = -0.2;
+    text.renderOrder = 12;
+    text.sync();
+    parent.add(text);
+  }
 }
 
 // ----- 공통: 반구 내면에 텍스트 방향 맞추기 -----
