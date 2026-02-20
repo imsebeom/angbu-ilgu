@@ -47,14 +47,14 @@ export function initScene(container) {
   // === Camera ===
   const aspect = window.innerWidth / window.innerHeight;
   const camera = new THREE.PerspectiveCamera(45, aspect, 0.01, 100);
-  camera.position.set(1.2, 1.4, 1.8);
-  camera.lookAt(0, -0.2, 0);
+  camera.position.set(0, 1.8, -2.2);
+  camera.lookAt(0, -0.15, 0);
 
   // === OrbitControls ===
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
-  controls.target.set(0, -0.2, 0);
+  controls.target.set(0, -0.15, 0);
   controls.minDistance = 0.6;
   controls.maxDistance = 5.0;
   controls.maxPolarAngle = Math.PI * 0.85;
