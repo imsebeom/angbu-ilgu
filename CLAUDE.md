@@ -79,3 +79,8 @@
 - 2025-02-21: 절기/시각 텍스트 반구 밖 투과 방지 - depthTest=true, depthOffset=-0.02, renderOrder 제거
 - 2025-02-21: 12지신 시간에 각(刻) 표시 추가 - 정각/一刻/二刻/三刻 (getJisinTime에 fullHanja/fullKorean 속성)
 - 2025-02-21: 날짜 입력창 옆에 절기 표기 추가 - 날짜+절기 연결 박스 UI (date-row > date-spinner.compact + date-term)
+- 2025-02-21: "배속"→"시간 진행" 라벨 변경, 1일/초 버튼 삭제, 실시간 버튼을 speed-controls 내 인라인으로 이동
+- 2025-02-21: 절기 박스에 상하 화살표 추가 - 24절기 순환 이동 기능 (term-spin 버튼)
+- 2025-02-21: Netlify 배포 - https://angbu-ilgu.netlify.app (사이트 ID: 2a481331-f675-44b9-81f0-3761d348f163)
+- 2025-02-21: 모드 토글 버튼(진태양시/현대시각)을 우하단→시각 컨트롤 영역으로 이동, 힌트 텍스트 추가
+- 2025-02-21: 절기 표시 한자+한글 좌우 배치 (한 줄) - date-term-text flex row
