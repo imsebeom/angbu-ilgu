@@ -129,7 +129,8 @@ export function getJisinTime(hours, minutes) {
   const isJeong = (adjusted % 2) === 1;
 
   // 각(刻) 계산: 1각=15분, 0~14분=정각, 15~29분=1각, 30~44분=2각, 45~59분=3각
-  const gak = Math.floor(minutes / 15);
+  const clampedMin = Math.min(Math.max(0, minutes), 59);
+  const gak = Math.floor(clampedMin / 15);
   const gakHanjaNum = ['', '一', '二', '三'];
 
   const choJeongHanja = isJeong ? '正' : '初';

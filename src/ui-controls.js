@@ -31,8 +31,9 @@ function solarToKst(solarMinutes, correctionMin) {
 // 분을 HH:MM 문자열로
 function formatTime(totalMinutes) {
   let m = ((totalMinutes % 1440) + 1440) % 1440; // 0~1439 범위로
-  const h = Math.floor(m / 60);
-  const min = Math.round(m % 60);
+  let h = Math.floor(m / 60);
+  let min = Math.round(m % 60);
+  if (min >= 60) { min = 0; h = (h + 1) % 24; } // 반올림 오버플로 방지
   return `${h.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
 }
 
@@ -72,8 +73,9 @@ export function initUI(state, callbacks) {
 
     if (labelMode === 'classic') {
       // 진태양시 모드: 메인=진태양시, 부가=KST
-      const solarH = Math.floor(((solarMinutes % 1440) + 1440) % 1440 / 60);
-      const solarM = Math.round(((solarMinutes % 1440) + 1440) % 1440 % 60);
+      let solarH = Math.floor(((solarMinutes % 1440) + 1440) % 1440 / 60);
+      let solarM = Math.round(((solarMinutes % 1440) + 1440) % 1440 % 60);
+      if (solarM >= 60) { solarM = 0; solarH = (solarH + 1) % 24; }
       timeDisplay.textContent = formatTime(solarMinutes);
       const jisin = getJisinTime(solarH, solarM);
       jisinDisplay.textContent = jisin.fullHanja;
