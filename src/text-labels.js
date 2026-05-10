@@ -2,8 +2,8 @@ import { Text } from 'troika-three-text';
 import * as THREE from 'three';
 import { ZODIAC_12, SEASON_LINES, HOUR_LINES, RIM_OUTER_RADIUS, BOWL_RADIUS, BOWL_THICKNESS, DEG2RAD, LATITUDE, LONGITUDE } from './constants.js';
 
-// Google Fonts CDN - Noto Sans KR Bold (가독성 좋은 고딕체, OTF)
-const FONT_URL = 'https://fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.otf';
+// 로컬 self-host (Vite는 /public을 루트로 서빙). Google Fonts URL은 버전 회전으로 404가 잦아 self-host로 고정.
+const FONT_URL = `${import.meta.env.BASE_URL}fonts/NotoSansKR-Bold.ttf`;
 
 /**
  * 두 모드의 텍스트 라벨을 생성하여 반환

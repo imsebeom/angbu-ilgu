@@ -84,3 +84,4 @@
 - 2025-02-21: Netlify 배포 - https://angbu-ilgu.netlify.app (사이트 ID: 2a481331-f675-44b9-81f0-3761d348f163)
 - 2025-02-21: 모드 토글 버튼(진태양시/현대시각)을 우하단→시각 컨트롤 영역으로 이동, 힌트 텍스트 추가
 - 2025-02-21: 절기 표시 한자+한글 좌우 배치 (한 줄) - date-term-text flex row
+- 2026-05-10: 반구 내부 음각 글자(절기명·시각명·12지신 등 모든 troika-three-text 라벨) 미표시 버그 수정. 원인: Google Fonts CDN URL(`fonts.gstatic.com/ea/notosanskr/v2/NotoSansKR-Bold.otf`)이 404로 사망 → troika가 폰트 로드 실패 시 텍스트를 조용히 그리지 않음. 해결: Noto Sans KR Bold(v39 ttf, 6.16MB)를 `public/fonts/`에 self-host하고 `${import.meta.env.BASE_URL}fonts/NotoSansKR-Bold.ttf`로 참조. Google Fonts URL은 폰트 버전 회전(v2→v36→v39)으로 깨지기 쉬워 self-host로 고정. Vite는 `public/`을 자동으로 `dist/`로 복사하므로 GitHub Pages 배포에 추가 작업 불필요.
