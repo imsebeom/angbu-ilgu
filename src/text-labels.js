@@ -131,7 +131,7 @@ function createSeasonLabels(parent, mode) {
       text.position.set(pt.x + side.offsetX, pt.y, pt.z);
       orientTextOnBowl(text, pt, true);
 
-      text.depthOffset = -0.02;
+      text.depthOffset = -0.1;
       text.sync();
       parent.add(text);
     }
@@ -166,7 +166,7 @@ function createHourLabels(parent, mode) {
       mainText.position.set(x, labelY, zPos);
       mainText.rotation.x = -Math.PI / 2;
       mainText.rotation.z = -azAngle;
-      mainText.depthOffset = -0.02;
+      mainText.depthOffset = -0.1;
       mainText.sync();
       parent.add(mainText);
 
@@ -183,7 +183,7 @@ function createHourLabels(parent, mode) {
         subText.position.set(x, subY, zPos);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle;
-        subText.depthOffset = -0.02;
+        subText.depthOffset = -0.1;
         subText.sync();
         parent.add(subText);
       }
@@ -202,7 +202,7 @@ function createHourLabels(parent, mode) {
       mainText.position.set(x, labelY, zPos);
       mainText.rotation.x = -Math.PI / 2;
       mainText.rotation.z = -azAngle;
-      mainText.depthOffset = -0.02;
+      mainText.depthOffset = -0.1;
       mainText.sync();
       parent.add(mainText);
 
@@ -220,7 +220,7 @@ function createHourLabels(parent, mode) {
         subText.position.set(x, subY, zPos);
         subText.rotation.x = -Math.PI / 2;
         subText.rotation.z = -azAngle;
-        subText.depthOffset = -0.02;
+        subText.depthOffset = -0.1;
         subText.sync();
         parent.add(subText);
       }
@@ -383,7 +383,7 @@ function createNoonLineLabels(parent, mode) {
     text.position.copy(pt);
     orientTextOnBowl(text, pt, true);
 
-    text.depthOffset = -0.02;
+    text.depthOffset = -0.1;
     text.sync();
     parent.add(text);
   }
@@ -416,7 +416,7 @@ function createEquinoxLineLabels(parent, mode) {
     text.position.copy(pt);
     orientTextOnBowl(text, pt, true);
 
-    text.depthOffset = -0.02;
+    text.depthOffset = -0.1;
     text.sync();
     parent.add(text);
   }
@@ -429,7 +429,7 @@ function orientTextOnBowl(textObj, surfacePoint, keepDepthTest = false) {
   const inwardNormal = surfacePoint.clone().normalize().negate();
 
   // 위치를 표면에서 약간 안쪽으로 이동 (반구 벽에 가리지 않도록)
-  textObj.position.addScaledVector(inwardNormal, 0.005);
+  textObj.position.addScaledVector(inwardNormal, 0.02);
 
   // 월드 "위" 방향
   const worldUp = new THREE.Vector3(0, 1, 0);
